@@ -18,6 +18,12 @@ export enum Theme {
   Supabase = 'Supabase',
   Microsoft = 'Microsoft',
   Google = 'Google',
+  Slack = 'Slack',
+  GitHub = 'GitHub',
+  Discord = 'Discord',
+  Notion = 'Notion',
+  Spotify = 'Spotify',
+  Twitter = 'Twitter',
 }
 
 export enum AppFont {

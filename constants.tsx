@@ -5,7 +5,14 @@ export const THEME_CLASSES: Record<Theme, string> = {
   [Theme.Supabase]: 'theme-supabase',
   [Theme.Microsoft]: 'theme-microsoft',
   [Theme.Google]: 'theme-google',
+  [Theme.Slack]: 'theme-slack',
+  [Theme.GitHub]: 'theme-github',
+  [Theme.Discord]: 'theme-discord',
+  [Theme.Notion]: 'theme-notion',
+  [Theme.Spotify]: 'theme-spotify',
+  [Theme.Twitter]: 'theme-twitter',
 };
+
 
 export const APP_FONTS: Record<AppFont, { name: string; className: string }> = {
   [AppFont.Inter]: { name: 'Inter', className: 'font-inter' },
