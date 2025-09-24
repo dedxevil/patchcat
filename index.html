@@ -15,6 +15,7 @@
         --font-roboto-mono: 'Roboto Mono', monospace;
         --font-source-code-pro: 'Source Code Pro', monospace;
       }
+      /* Supabase Theme */
       .theme-supabase {
         --bg-default: #1c1c1c; --bg-subtle: #232323; --bg-muted: #2a2a2a;
         --border-default: #363636; --border-strong: #4d4d4d;
@@ -24,23 +25,25 @@
         --success: #3ecf8e; --warning: #f59e0b;
         --syntax-key: #6ee7b7; --syntax-string: #93c5fd; --syntax-number: #f9a8d4; --syntax-boolean: #fde047; --syntax-null: #d8b4fe;
       }
+      /* Microsoft (VS Code) Theme */
       .theme-microsoft {
-        --bg-default: #201F1F; --bg-subtle: #252424; --bg-muted: #2f2f2f;
-        --border-default: #3e3d3d; --border-strong: #505050;
-        --text-default: #ffffff; --text-muted: #c8c8c8; --text-subtle: #979797;
-        --brand: #6264A7; --brand-hover: #7b7db9;
-        --danger: #C4314B; --danger-hover: #d94b63;
-        --success: #4caf50; --warning: #ffc107;
+        --bg-default: #1E1E1E; --bg-subtle: #252526; --bg-muted: #333333;
+        --border-default: #3c3c3c; --border-strong: #505050;
+        --text-default: #d4d4d4; --text-muted: #cccccc; --text-subtle: #979797;
+        --brand: #007ACC; --brand-hover: #0099FF;
+        --danger: #F44747; --danger-hover: #f76f6f;
+        --success: #4ec9b0; --warning: #ffc107;
         --syntax-key: #9cdcfe; --syntax-string: #ce9178; --syntax-number: #b5cea8; --syntax-boolean: #569cd6; --syntax-null: #c586c0;
       }
+      /* Google (Material You) Theme */
       .theme-google {
-        --bg-default: #202124; --bg-subtle: #292a2d; --bg-muted: #303134;
-        --border-default: #3c4043; --border-strong: #5f6368;
-        --text-default: #e8eaed; --text-muted: #9aa0a6; --text-subtle: #80868b;
-        --brand: #8ab4f8; --brand-hover: #aecbfa; /* Google Blue */
-        --danger: #f28b82; --danger-hover: #e3746b; /* Google Red */
-        --success: #81c995; --warning: #fdd663; /* Google Green & Yellow (lighter for contrast) */
-        --syntax-key: #82aaff; --syntax-string: #c3e88d; --syntax-number: #f78c6c; --syntax-boolean: #ffcb6b; --syntax-null: #c792ea;
+        --bg-default: #1A1B1E; --bg-subtle: #2D2F31; --bg-muted: #3A3D40;
+        --border-default: #43474A; --border-strong: #5f6368;
+        --text-default: #E2E2E6; --text-muted: #C2C2C6; --text-subtle: #8A8F94;
+        --brand: #A8C7FA; --brand-hover: #8AB4F8;
+        --danger: #F2B8B5; --danger-hover: #e3746b;
+        --success: #B7F5B7; --warning: #FDE293;
+        --syntax-key: #82AAFF; --syntax-string: #C3E88D; --syntax-number: #F78C6C; --syntax-boolean: #FFCB6B; --syntax-null: #C792EA;
       }
 
       /* Custom variable utilities */
@@ -67,12 +70,14 @@
       .text-warning { color: var(--warning); }
       .hover\:bg-border-default:hover { background-color: var(--border-default); }
       .focus\:ring-brand:focus { --tw-ring-color: var(--brand); }
+      
+      /* Opacity Helpers */
       .theme-supabase .bg-brand\/20 { background-color: rgba(62, 207, 142, 0.2); }
       .theme-supabase .hover\:bg-brand\/40:hover { background-color: rgba(62, 207, 142, 0.4); }
-      .theme-microsoft .bg-brand\/20 { background-color: rgba(98, 100, 167, 0.2); }
-      .theme-microsoft .hover\:bg-brand\/40:hover { background-color: rgba(98, 100, 167, 0.4); }
-      .theme-google .bg-brand\/20 { background-color: rgba(138, 180, 248, 0.2); }
-      .theme-google .hover\:bg-brand\/40:hover { background-color: rgba(138, 180, 248, 0.4); }
+      .theme-microsoft .bg-brand\/20 { background-color: rgba(0, 122, 204, 0.2); }
+      .theme-microsoft .hover\:bg-brand\/40:hover { background-color: rgba(0, 122, 204, 0.4); }
+      .theme-google .bg-brand\/20 { background-color: rgba(168, 199, 250, 0.15); }
+      .theme-google .hover\:bg-brand\/40:hover { background-color: rgba(168, 199, 250, 0.3); }
 
       /* Syntax Highlighting Utilities */
       .text-syntax-key { color: var(--syntax-key); }
