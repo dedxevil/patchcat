@@ -82,7 +82,7 @@ const Layout: React.FC = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="relative flex-grow flex flex-col min-w-0 md:border-l md:border-r border-border-default">
+      <div className="relative flex-grow flex flex-col min-w-0 md:border-l md:border-r border-border-default overflow-hidden">
         <MobileHeader 
             onToggleLeft={() => setLeftSidebarOpen(!leftSidebarOpen)} 
             onToggleRight={() => setRightSidebarOpen(!rightSidebarOpen)}

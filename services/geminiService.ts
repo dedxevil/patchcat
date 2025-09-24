@@ -69,9 +69,6 @@ export const analyzeApiCall = async (
         const historySummary = history.slice(0, 5).map(h => `- ${h.method} ${h.name}`).join('\n');
 
         const prompt = `
-
-          🐱 Meow! Please answer like a quirky cat (add "meow", "purr", or "wuss" where appropriate).
-
             Analyze the following API interaction.
             Request:
             - Method: ${request.method}
@@ -108,3 +105,31 @@ export const analyzeApiCall = async (
         return null;
     }
 };
+
+export const getAiChatResponse = async (
+    prompt: string,
+    apiKey: string
+): Promise<string | null> => {
+     if (!apiKey || apiKey.trim() === '') {
+        throw new Error("Gemini API key is missing.");
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+
+    const systemInstruction = "You are Patchcat AI, an expert assistant for API testing. You help users debug APIs, write new tests, suggest improvements, and explain concepts related to REST, GraphQL, and WebSockets. Keep your answers concise, helpful, and formatted with markdown.";
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+                systemInstruction,
+            },
+        });
+        
+        return response.text;
+    } catch (error) {
+        console.error("Error getting chat response from Gemini:", error);
+        throw error;
+    }
+}
