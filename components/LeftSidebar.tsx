@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { WorkspaceContext } from '../App';
-import { HistoryIcon, SettingsIcon, TrashIcon, PatchcatLogo, PatchcatLogoIconOnly } from './icons';
+import { HistoryIcon, SettingsIcon, TrashIcon, PatchcatLogo, PatchcatLogoIconOnly, CloseIcon } from './icons';
 import Tooltip from './Tooltip';
 import { ApiRequest } from '../types';
 import { getMethodColorClass } from '../constants';
@@ -8,14 +8,16 @@ import { getMethodColorClass } from '../constants';
 interface LeftSidebarProps {
   onOpenSettings: () => void;
   isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
 }
 
-const LeftSidebar: React.FC<LeftSidebarProps> = ({ onOpenSettings, isOpen }) => {
+const LeftSidebar: React.FC<LeftSidebarProps> = ({ onOpenSettings, isOpen, setIsOpen }) => {
   const { state, dispatch } = useContext(WorkspaceContext)!;
   const { history } = state;
 
   const handleSelectHistory = (request: ApiRequest) => {
     dispatch({ type: 'ADD_TAB', payload: { request } });
+    setIsOpen(false); // Close sidebar on mobile after selection
   };
   
   const handleDeleteHistory = (e: React.MouseEvent, requestId: string) => {
@@ -30,9 +32,17 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onOpenSettings, isOpen }) => 
   }
 
   return (
-    <div className="h-full flex flex-col bg-bg-subtle text-sm">
-      <div className={`p-3 h-[61px] flex items-center ${isOpen ? 'justify-start' : 'justify-center'}`}>
-        {isOpen ? <PatchcatLogo /> : <PatchcatLogoIconOnly />}
+    <div className="h-full flex flex-col bg-bg-subtle text-sm pt-[61px] md:pt-0">
+      <div className={`p-3 h-[61px] flex items-center border-b border-border-default absolute top-0 left-0 right-0 md:relative md:border-b-0 ${isOpen ? 'justify-between' : 'justify-center'}`}>
+        <div className={`flex items-center ${!isOpen && 'hidden'}`}>
+          <PatchcatLogo />
+        </div>
+        <div className={`${isOpen ? 'hidden' : 'block'}`}>
+            <PatchcatLogoIconOnly />
+        </div>
+        <button onClick={() => setIsOpen(false)} className="md:hidden p-2 text-text-muted hover:text-text-default">
+            <CloseIcon />
+        </button>
       </div>
       <div className="flex-grow overflow-y-auto">
         {isOpen && (

@@ -93,7 +93,7 @@ export const getInitialWorkspace = (): Workspace => {
         aiMessages: [{
             id: uuidv4(),
             type: 'info',
-            content: "Welcome to Patchcat AI! I can help you test your APIs. Make a request, and I'll analyze the response."
+            content: "🐱 Meow! Welcome to Patchcat AI! I can help you test your APIs. Make a request, and I'll analyze the response."
         }],
         analyzedRequestsCache: [],
     }

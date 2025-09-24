@@ -40,13 +40,13 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response }) => {
 
   return (
     <div className="p-4 flex-grow flex flex-col min-h-0">
-      <div className="flex items-center gap-4 mb-4 text-sm flex-shrink-0">
+      <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mb-4 text-sm flex-shrink-0">
         <span className="font-semibold">Status: <span className={getStatusClass()}>{response.status} {response.statusText}</span></span>
         <span className="font-semibold">Time: <span className="text-text-default font-normal">{response.time} ms</span></span>
         <span className="font-semibold">Size: <span className="text-text-default font-normal">{formatSize(response.size)}</span></span>
       </div>
       
-      <div className="flex justify-between items-center border-b border-border-default flex-shrink-0">
+      <div className="flex flex-wrap justify-between items-center border-b border-border-default flex-shrink-0 gap-2">
         <div className="flex">
             <button 
             onClick={() => setActiveTab('body')} 
@@ -62,7 +62,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response }) => {
             </button>
         </div>
         {activeTab === 'body' && (
-            <div className="flex items-center gap-2 pr-2">
+            <div className="flex items-center gap-2 pb-2 md:pb-0 pr-2">
                 <div className="relative">
                     <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
                     <input
@@ -93,9 +93,9 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response }) => {
         {activeTab === 'headers' && (
           <div className="space-y-1 text-sm">
             {Object.entries(response.headers).map(([key, value]) => (
-              <div key={key} className="grid grid-cols-3 gap-2">
+              <div key={key} className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <span className="font-semibold text-text-muted truncate">{key}</span>
-                <span className="col-span-2 text-text-default break-all">{value}</span>
+                <span className="sm:col-span-2 text-text-default break-all">{value}</span>
               </div>
             ))}
           </div>

@@ -69,6 +69,9 @@ export const analyzeApiCall = async (
         const historySummary = history.slice(0, 5).map(h => `- ${h.method} ${h.name}`).join('\n');
 
         const prompt = `
+
+          🐱 Meow! Please answer like a quirky cat (add "meow", "purr", or "wuss" where appropriate).
+
             Analyze the following API interaction.
             Request:
             - Method: ${request.method}

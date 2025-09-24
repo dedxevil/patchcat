@@ -1,16 +1,17 @@
 // FIX: Create RightSidebar component to display AI messages and suggestions.
 import React, { useContext, useEffect, useRef } from 'react';
 import { WorkspaceContext } from '../App';
-import { SparklesIcon } from './icons';
+import { CloseIcon, SparklesIcon } from './icons';
 import { AiSuggestion, ApiRequest } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import Tooltip from './Tooltip';
 
 interface RightSidebarProps {
   isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
 }
 
-const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen }) => {
+const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, setIsOpen }) => {
   const { state, dispatch } = useContext(WorkspaceContext)!;
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -27,10 +28,11 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen }) => {
       body: { type: 'raw', content: (body as any)?.content || (body as any) || '' },
     };
     dispatch({ type: 'ADD_TAB', payload: { request: newRequest } });
+    setIsOpen(false);
   };
 
   const handleBulkTest = (suggestions: AiSuggestion[]) => {
-      suggestions.forEach(suggestion => {
+      suggestions.forEach((suggestion, index) => {
           const { body, ...restOfApiRequest } = suggestion.apiRequest;
           const newRequest: Partial<ApiRequest> = {
               ...restOfApiRequest,
@@ -38,18 +40,30 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen }) => {
               isAiGenerated: true,
               body: { type: 'raw', content: (body as any)?.content || (body as any) || '' },
           };
-          dispatch({ type: 'ADD_TAB', payload: { request: newRequest } });
+          // only make the first tab active
+          dispatch({ type: 'ADD_TAB', payload: { request: newRequest, makeActive: index === 0 } });
       });
+      setIsOpen(false);
   }
 
   const activeTab = state.tabs.find(t => t.id === state.activeTabId);
   const isAiKeyMissing = state.settings.aiEnabled && !state.settings.geminiApiKey;
 
   return (
-    <div className={`h-full flex flex-col bg-bg-subtle text-sm transition-all duration-300 ease-in-out ${isOpen ? 'p-3' : 'p-0 items-center justify-center'}`}>
-      <div className={`flex items-center gap-2 h-[52px] flex-shrink-0 ${isOpen ? 'justify-start' : 'justify-center'}`}>
-        <SparklesIcon className="text-brand" />
-        {isOpen && <h2 className="font-semibold text-lg">AI Assistant</h2>}
+    <div className={`h-full flex flex-col bg-bg-subtle text-sm transition-all duration-300 ease-in-out pt-[61px] md:pt-0 ${isOpen ? 'p-3' : 'p-0 items-center justify-center'}`}>
+      <div className={`flex items-center justify-between gap-2 h-[61px] flex-shrink-0 absolute md:relative top-0 left-0 right-0 p-3 border-b border-border-default md:border-b-0 ${isOpen ? 'justify-between' : 'justify-center'}`}>
+        <div className={`flex items-center gap-2 ${!isOpen && 'hidden'}`}>
+          <SparklesIcon className="text-brand" />
+          <h2 className="font-semibold text-lg">AI Assistant</h2>
+        </div>
+        <div className={`${isOpen ? 'hidden' : 'block'}`}>
+            <Tooltip text="AI Assistant">
+                <SparklesIcon className="text-brand w-8 h-8" />
+            </Tooltip>
+        </div>
+        <button onClick={() => setIsOpen(false)} className="md:hidden p-2 text-text-muted hover:text-text-default">
+            <CloseIcon />
+        </button>
       </div>
       
       {isOpen ? (
@@ -104,11 +118,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen }) => {
              </div>
           )}
         </>
-      ) : (
-        <Tooltip text="AI Assistant">
-            <SparklesIcon className="text-brand w-8 h-8" />
-        </Tooltip>
-      )}
+      ) : null}
     </div>
   );
 };

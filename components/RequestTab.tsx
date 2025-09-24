@@ -33,30 +33,28 @@ const KeyValueEditor: React.FC<{
     return (
         <div className="p-4 space-y-2 text-sm">
             {items.map((item, index) => (
-                <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
-                    <div className="col-span-1 flex items-center justify-center">
-                        <input
-                            type="checkbox"
-                            className="form-checkbox h-4 w-4 text-brand bg-bg-muted border-border-default rounded focus:ring-brand"
-                            checked={item.enabled}
-                            onChange={(e) => handleItemChange(index, 'enabled', e.target.checked)}
-                        />
-                    </div>
+                <div key={item.id} className="flex flex-wrap items-center gap-2 border-b border-border-default pb-2">
+                    <input
+                        type="checkbox"
+                        className="form-checkbox h-4 w-4 text-brand bg-bg-muted border-border-default rounded focus:ring-brand"
+                        checked={item.enabled}
+                        onChange={(e) => handleItemChange(index, 'enabled', e.target.checked)}
+                    />
                     <input
                         type="text"
                         placeholder="Key"
-                        className="col-span-5 bg-bg-subtle border border-border-default rounded-md px-2 py-1 focus:ring-1 focus:ring-brand focus:outline-none"
+                        className="flex-grow min-w-[150px] bg-bg-subtle border border-border-default rounded-md px-2 py-1 focus:ring-1 focus:ring-brand focus:outline-none"
                         value={item.key}
                         onChange={(e) => handleItemChange(index, 'key', e.target.value)}
                     />
                     <input
                         type="text"
                         placeholder="Value"
-                        className="col-span-5 bg-bg-subtle border border-border-default rounded-md px-2 py-1 focus:ring-1 focus:ring-brand focus:outline-none"
+                        className="flex-grow min-w-[150px] bg-bg-subtle border border-border-default rounded-md px-2 py-1 focus:ring-1 focus:ring-brand focus:outline-none"
                         value={item.value}
                         onChange={(e) => handleItemChange(index, 'value', e.target.value)}
                     />
-                    <button onClick={() => removeItem(index)} className="col-span-1 text-text-muted hover:text-danger p-1">
+                    <button onClick={() => removeItem(index)} className="text-text-muted hover:text-danger p-1">
                         <TrashIcon />
                     </button>
                 </div>
@@ -122,23 +120,21 @@ const FormDataEditor: React.FC<{
     return (
         <div className="space-y-2 text-sm">
             {fields.map((field, index) => (
-                <div key={field.id} className="grid grid-cols-12 gap-2 items-center">
-                    <div className="col-span-1 flex items-center justify-center">
-                        <input
-                            type="checkbox"
-                            className="form-checkbox h-4 w-4 text-brand bg-bg-muted border-border-default rounded focus:ring-brand"
-                            checked={field.enabled}
-                            onChange={(e) => handleFieldChange(index, 'enabled', e.target.checked)}
-                        />
-                    </div>
+                <div key={field.id} className="flex flex-wrap items-center gap-2 border-b border-border-default pb-2">
+                    <input
+                        type="checkbox"
+                        className="form-checkbox h-4 w-4 text-brand bg-bg-muted border-border-default rounded focus:ring-brand"
+                        checked={field.enabled}
+                        onChange={(e) => handleFieldChange(index, 'enabled', e.target.checked)}
+                    />
                     <input
                         type="text"
                         placeholder="Key"
-                        className="col-span-4 bg-bg-subtle border border-border-default rounded-md px-2 py-1 focus:ring-1 focus:ring-brand focus:outline-none"
+                        className="flex-grow min-w-[120px] bg-bg-subtle border border-border-default rounded-md px-2 py-1 focus:ring-1 focus:ring-brand focus:outline-none"
                         value={field.key}
                         onChange={(e) => handleFieldChange(index, 'key', e.target.value)}
                     />
-                    <div className="col-span-6 flex gap-2">
+                    <div className="flex-grow min-w-[200px] flex gap-2">
                         {field.type === 'text' ? (
                             <input
                                 type="text"
@@ -169,7 +165,7 @@ const FormDataEditor: React.FC<{
                         </select>
                     </div>
 
-                    <button onClick={() => removeField(index)} className="col-span-1 text-text-muted hover:text-danger p-1">
+                    <button onClick={() => removeField(index)} className="text-text-muted hover:text-danger p-1">
                         <TrashIcon />
                     </button>
                 </div>
@@ -531,45 +527,47 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
     return (
         <div className="flex flex-col h-full bg-bg-default text-text-default">
             {/* Request URL Bar */}
-            <div className="flex-shrink-0 flex items-center p-2 gap-2 border-b border-border-default">
-                <select
-                    value={request.protocol}
-                    onChange={(e) => handleProtocolChange(e.target.value as Protocol)}
-                    className="font-mono font-bold text-sm bg-transparent border rounded-md focus:outline-none focus:ring-1 focus:ring-brand pl-3 pr-8 py-2 border-border-default"
-                >
-                    {Object.values(Protocol).map(p => <option key={p} value={p} className="bg-bg-subtle font-bold">{p}</option>)}
-                </select>
-                
-                {isHttpProtocol && (
+            <div className="flex-shrink-0 flex flex-wrap items-center p-2 gap-2 border-b border-border-default">
+                <div className="flex items-center gap-2 flex-grow-[1] w-full md:w-auto">
                     <select
-                        value={request.method}
-                        onChange={(e) => handleRequestChange({ method: e.target.value as HttpMethod })}
-                        className={`font-mono font-bold text-sm bg-transparent border rounded-md focus:outline-none focus:ring-1 focus:ring-brand pl-3 pr-10 py-2 ${getMethodSelectClasses(request.method)}`}
+                        value={request.protocol}
+                        onChange={(e) => handleProtocolChange(e.target.value as Protocol)}
+                        className="font-mono font-bold text-sm bg-transparent border rounded-md focus:outline-none focus:ring-1 focus:ring-brand pl-3 pr-8 py-2 border-border-default"
                     >
-                        {Object.values(HttpMethod).map(method => (
-                            <option
-                                key={method}
-                                value={method}
-                                className={`bg-bg-subtle font-bold ${getMethodColorClass(method)}`}
-                            >
-                                {method}
-                            </option>
-                        ))}
+                        {Object.values(Protocol).map(p => <option key={p} value={p} className="bg-bg-subtle font-bold">{p}</option>)}
                     </select>
-                )}
+                    
+                    {isHttpProtocol && (
+                        <select
+                            value={request.method}
+                            onChange={(e) => handleRequestChange({ method: e.target.value as HttpMethod })}
+                            className={`font-mono font-bold text-sm bg-transparent border rounded-md focus:outline-none focus:ring-1 focus:ring-brand pl-3 pr-10 py-2 ${getMethodSelectClasses(request.method)}`}
+                        >
+                            {Object.values(HttpMethod).map(method => (
+                                <option
+                                    key={method}
+                                    value={method}
+                                    className={`bg-bg-subtle font-bold ${getMethodColorClass(method)}`}
+                                >
+                                    {method}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+                </div>
                 
                 <input
                     type="text"
                     value={request.url}
                     onChange={(e) => handleRequestChange({ url: e.target.value })}
                     placeholder={isHttpProtocol ? "https://api.example.com/resource" : "wss://socket.example.com"}
-                    className="flex-grow p-2 bg-bg-subtle border border-border-default rounded-md text-sm focus:ring-1 focus:ring-brand focus:outline-none"
+                    className="flex-grow-[999] min-w-[200px] w-full md:w-auto p-2 bg-bg-subtle border border-border-default rounded-md text-sm focus:ring-1 focus:ring-brand focus:outline-none"
                 />
                 {isHttpProtocol && (
                     <button
                         onClick={handleSendRequest}
                         disabled={isLoading}
-                        className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-md font-semibold text-sm hover:bg-brand-hover disabled:bg-brand/50 disabled:cursor-not-allowed"
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-brand text-white rounded-md font-semibold text-sm hover:bg-brand-hover disabled:bg-brand/50 disabled:cursor-not-allowed flex-grow-[1] w-full sm:w-auto"
                     >
                         <SendIcon className="w-4 h-4" />
                         {isLoading ? 'Sending...' : 'Send'}
