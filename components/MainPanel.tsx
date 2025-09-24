@@ -59,7 +59,7 @@ const MainPanel: React.FC = () => {
   }
 
   return (
-    <div className="flex-grow flex flex-col h-full bg-bg-default min-w-0">
+    <div className="flex-grow flex flex-col bg-bg-default min-w-0 min-h-0">
       {/* Tab Bar */}
       <div className="flex-shrink-0 flex items-center border-b border-border-default bg-bg-subtle">
         <div className="flex-grow flex items-center overflow-x-auto">
