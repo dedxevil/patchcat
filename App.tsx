@@ -1,6 +1,5 @@
-
 import React, { createContext, useReducer, useEffect, useState } from 'react';
-import { Workspace, TabData, ApiRequest, ApiResponse, Settings, AiMessage, Theme, AppFont, Protocol, HttpMethod } from './types';
+import { Workspace, TabData, ApiRequest, ApiResponse, Settings, AiMessage, Theme, AppFont, Protocol, HttpMethod, WebSocketMessage, WsStatus } from './types';
 import { getInitialWorkspace, THEME_CLASSES, APP_FONTS } from './constants';
 import Layout from './components/Layout';
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -9,7 +8,7 @@ import StartupLoader from './components/StartupLoader';
 
 // --- Reducer Actions ---
 type Action =
-  | { type: 'ADD_TAB'; payload: { request?: Partial<ApiRequest>; makeActive?: boolean } }
+  | { type: 'ADD_TAB'; payload: { protocol?: Protocol, request?: Partial<ApiRequest>; makeActive?: boolean } }
   | { type: 'CLOSE_TAB'; payload: string }
   | { type: 'DUPLICATE_TAB'; payload: string }
   | { type: 'SET_ACTIVE_TAB'; payload: string }
@@ -23,7 +22,9 @@ type Action =
   | { type: 'CLEAR_HISTORY' }
   | { type: 'ADD_AI_MESSAGE'; payload: AiMessage }
   | { type: 'LOAD_WORKSPACE'; payload: Workspace }
-  | { type: 'ADD_TO_ANALYSIS_CACHE'; payload: string };
+  | { type: 'ADD_TO_ANALYSIS_CACHE'; payload: string }
+  | { type: 'SET_WS_STATUS'; payload: { tabId: string; status: WsStatus } }
+  | { type: 'ADD_WS_MESSAGE'; payload: { tabId: string; message: WebSocketMessage } };
 
 // --- Reducer ---
 const workspaceReducer = (state: Workspace, action: Action): Workspace => {
@@ -32,24 +33,29 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
         return action.payload;
         
     case 'ADD_TAB': {
+      const protocol = action.payload.protocol || Protocol.REST;
       const newRequestId = uuidv4();
       const newTabId = uuidv4();
       const newTab: TabData = {
         id: newTabId,
-        name: action.payload.request?.name || `Request ${state.tabs.length + 1}`,
+        name: action.payload.request?.name || `${protocol} Request ${state.tabs.length + 1}`,
         isLoading: false,
         request: {
           id: newRequestId,
           name: 'New Request',
-          protocol: Protocol.REST,
-          url: 'https://jsonplaceholder.typicode.com/todos/1',
+          protocol,
+          url: protocol === Protocol.WebSocket ? 'wss://socketsbay.com/wss/v2/1/demo/' : 'https://jsonplaceholder.typicode.com/todos/1',
           method: HttpMethod.GET,
           headers: [],
           queryParams: [],
           body: { type: 'raw', content: '' },
-          auth: { type: 'none' },
+          auth: { type: 'inherit' },
           ...action.payload.request,
         },
+        ...(protocol === Protocol.WebSocket && {
+          wsStatus: 'disconnected',
+          wsMessages: [],
+        }),
       };
       return {
         ...state,
@@ -88,7 +94,7 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
                   headers: [],
                   queryParams: [],
                   body: { type: 'raw', content: '' },
-                  auth: { type: 'none' },
+                  auth: { type: 'inherit' },
               },
           });
           newActiveTabId = firstTabId;
@@ -108,6 +114,7 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
         duplicatedRequest.name = `${tabToDuplicate.request.name} (Copy)`;
         
         const newTab: TabData = {
+            ...JSON.parse(JSON.stringify(tabToDuplicate)), // Deep copy all tab properties
             id: newTabId,
             name: `${tabToDuplicate.name} (Copy)`,
             isLoading: false,
@@ -136,15 +143,43 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
             )
         };
 
-    case 'UPDATE_REQUEST':
-      return {
-        ...state,
-        tabs: state.tabs.map(tab =>
-          tab.id === action.payload.tabId
-            ? { ...tab, request: { ...tab.request, ...action.payload.request } }
-            : tab
-        ),
-      };
+    case 'UPDATE_REQUEST': {
+        return {
+            ...state,
+            tabs: state.tabs.map(tab => {
+                if (tab.id !== action.payload.tabId) return tab;
+
+                const newRequest = { ...tab.request, ...action.payload.request };
+                const didProtocolChange = action.payload.request.protocol && action.payload.request.protocol !== tab.request.protocol;
+                
+                let resetState: Partial<TabData> = {};
+                if (didProtocolChange) {
+                    if (newRequest.protocol === Protocol.WebSocket) {
+                        // FIX: Using a constant for the new name fixes a TypeScript error where 'name' was accessed on an object of type '{}'.
+                        const newName = tab.name.includes('Request') ? 'WS Request' : tab.name;
+                        resetState = {
+                            response: undefined,
+                            wsStatus: 'disconnected',
+                            wsMessages: [],
+                            name: newName,
+                        };
+                        newRequest.name = newName;
+                    } else { // Switched back to REST/GraphQL
+                        // FIX: Using a constant for the new name fixes a TypeScript error where 'name' was accessed on an object of type '{}'.
+                        const newName = tab.name.includes('Request') ? (newRequest.protocol === Protocol.GraphQL ? 'GQL Request' : 'REST Request') : tab.name;
+                        resetState = {
+                            wsStatus: undefined,
+                            wsMessages: undefined,
+                            name: newName,
+                        };
+                        newRequest.name = newName;
+                    }
+                }
+
+                return { ...tab, request: newRequest, ...resetState };
+            }),
+        };
+    }
 
     case 'SET_RESPONSE':
       return {
@@ -191,6 +226,23 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
     
     case 'ADD_TO_ANALYSIS_CACHE':
         return { ...state, analyzedRequestsCache: [...state.analyzedRequestsCache, action.payload].slice(-50) };
+    
+    case 'SET_WS_STATUS':
+        return {
+            ...state,
+            tabs: state.tabs.map(tab =>
+                tab.id === action.payload.tabId ? { ...tab, wsStatus: action.payload.status } : tab
+            ),
+        };
+    
+    case 'ADD_WS_MESSAGE':
+        return {
+            ...state,
+            tabs: state.tabs.map(tab =>
+                tab.id === action.payload.tabId ? { ...tab, wsMessages: [...(tab.wsMessages || []), action.payload.message].slice(-100) } : tab
+            ),
+        };
+
 
     default:
       return state;
@@ -226,6 +278,14 @@ const App: React.FC = () => {
                             ...defaultWorkspace.settings,
                             ...loadedWorkspace.settings,
                         },
+                        tabs: loadedWorkspace.tabs.map((tab: TabData) => ({
+                            ...tab,
+                            request: {
+                                ...getInitialWorkspace().tabs[0].request,
+                                ...tab.request,
+                                auth: tab.request.auth || { type: 'inherit' }
+                            }
+                        }))
                     };
                     dispatch({ type: 'LOAD_WORKSPACE', payload: migratedWorkspace });
                 } else {

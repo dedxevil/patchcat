@@ -1,4 +1,3 @@
-// FIX: Create types file to define all shared interfaces and enums.
 export enum HttpMethod {
   GET = 'GET',
   POST = 'POST',
@@ -12,6 +11,7 @@ export enum HttpMethod {
 export enum Protocol {
   REST = 'REST',
   GraphQL = 'GraphQL',
+  WebSocket = 'WebSocket',
 }
 
 export enum Theme {
@@ -41,7 +41,7 @@ export interface QueryParam {
 }
 
 export interface Auth {
-  type: 'none' | 'bearer';
+  type: 'none' | 'bearer' | 'inherit';
   token?: string;
 }
 
@@ -68,7 +68,7 @@ export interface ApiRequest {
   headers: Header[];
   queryParams: QueryParam[];
   body: Body;
-  auth?: Auth;
+  auth: Auth;
   isAiGenerated?: boolean;
 }
 
@@ -81,12 +81,24 @@ export interface ApiResponse {
   headers: Record<string, string>;
 }
 
+export interface WebSocketMessage {
+  id: string;
+  direction: 'sent' | 'received' | 'system';
+  content: string;
+  timestamp: number;
+}
+
+export type WsStatus = 'disconnected' | 'connecting' | 'connected';
+
 export interface TabData {
   id: string;
   name: string;
   isLoading: boolean;
   request: ApiRequest;
   response?: ApiResponse;
+  // WebSocket specific state
+  wsStatus?: WsStatus;
+  wsMessages?: WebSocketMessage[];
 }
 
 export type AiMessageType = 'info' | 'thinking' | 'suggestion' | 'error' | 'user';

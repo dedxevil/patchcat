@@ -1,7 +1,4 @@
-
-
-
-import { Workspace, Theme, AppFont, ApiRequest, Protocol, HttpMethod, TabData } from './types';
+import { Workspace, Theme, AppFont, ApiRequest, Protocol, HttpMethod, TabData, Auth } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
 export const THEME_CLASSES: Record<Theme, string> = {
@@ -15,6 +12,45 @@ export const APP_FONTS: Record<AppFont, { name: string; className: string }> = {
   [AppFont.RobotoMono]: { name: 'Roboto Mono', className: 'font-roboto-mono' },
   [AppFont.SourceCodePro]: { name: 'Source Code Pro', className: 'font-source-code-pro' },
 };
+
+export const getMethodColorClass = (method: HttpMethod): string => {
+  switch (method) {
+    case HttpMethod.GET:
+      return 'text-success';
+    case HttpMethod.POST:
+      return 'text-yellow-400';
+    case HttpMethod.PUT:
+      return 'text-blue-400';
+    case HttpMethod.PATCH:
+      return 'text-purple-400';
+    case HttpMethod.DELETE:
+      return 'text-danger';
+    case HttpMethod.HEAD:
+    case HttpMethod.OPTIONS:
+    default:
+      return 'text-text-subtle';
+  }
+};
+
+export const getMethodSelectClasses = (method: HttpMethod): string => {
+    // Returns text and border color classes
+    switch (method) {
+      case HttpMethod.GET:
+        return 'text-success border-success/50';
+      case HttpMethod.POST:
+        return 'text-yellow-400 border-yellow-400/50';
+      case HttpMethod.PUT:
+        return 'text-blue-400 border-blue-400/50';
+      case HttpMethod.PATCH:
+        return 'text-purple-400 border-purple-400/50';
+      case HttpMethod.DELETE:
+        return 'text-danger border-danger/50';
+      case HttpMethod.HEAD:
+      case HttpMethod.OPTIONS:
+      default:
+        return 'text-text-subtle border-border-default';
+    }
+}
 
 export const getInitialWorkspace = (): Workspace => {
     const firstTabId = uuidv4();
@@ -33,7 +69,7 @@ export const getInitialWorkspace = (): Workspace => {
                 headers: [],
                 queryParams: [],
                 body: { type: 'raw', content: '' },
-                auth: { type: 'none' },
+                auth: { type: 'inherit' },
             },
         }],
         activeTabId: firstTabId,

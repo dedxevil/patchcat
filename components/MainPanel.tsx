@@ -1,12 +1,16 @@
 
-import React, { useContext } from 'react';
+import React, { useContext, useState, useRef, useEffect } from 'react';
 import { WorkspaceContext } from '../App';
 import RequestTab from './RequestTab';
 import { CloseIcon, PlusIcon, SparklesIcon, CopyIcon } from './icons';
+import { getMethodColorClass } from '../constants';
+import { Protocol } from '../types';
 
 const MainPanel: React.FC = () => {
   const { state, dispatch } = useContext(WorkspaceContext)!;
   const { tabs, activeTabId } = state;
+  const [isAddTabOpen, setIsAddTabOpen] = useState(false);
+  const addTabRef = useRef<HTMLDivElement>(null);
 
   const activeTab = tabs.find(tab => tab.id === activeTabId);
 
@@ -21,8 +25,9 @@ const MainPanel: React.FC = () => {
     dispatch({ type: 'CLOSE_TAB', payload: tabId });
   };
 
-  const handleAddTab = () => {
-    dispatch({ type: 'ADD_TAB', payload: { makeActive: true } });
+  const handleAddTab = (protocol: Protocol) => {
+    dispatch({ type: 'ADD_TAB', payload: { protocol, makeActive: true } });
+    setIsAddTabOpen(false);
   };
   
   const handleDuplicateTab = (e: React.MouseEvent, tabId: string) => {
@@ -30,63 +35,98 @@ const MainPanel: React.FC = () => {
     dispatch({ type: 'DUPLICATE_TAB', payload: tabId });
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (addTabRef.current && !addTabRef.current.contains(event.target as Node)) {
+        setIsAddTabOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  
+  const getProtocolDisplay = (tab: (typeof tabs)[0]) => {
+      switch (tab.request.protocol) {
+          case Protocol.REST:
+              return { text: tab.request.method, className: getMethodColorClass(tab.request.method) };
+          case Protocol.GraphQL:
+              return { text: 'GQL', className: 'text-purple-400' };
+          case Protocol.WebSocket:
+              return { text: 'WS', className: 'text-blue-400' };
+          default:
+              return { text: 'N/A', className: 'text-text-subtle' };
+      }
+  }
+
   return (
     <div className="flex-grow flex flex-col h-full bg-bg-default min-w-0">
       {/* Tab Bar */}
       <div className="flex-shrink-0 flex items-center border-b border-border-default bg-bg-subtle">
         <div className="flex-grow flex items-center overflow-x-auto">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => handleSelectTab(tab.id)}
-              className={`relative flex items-center gap-2 pl-4 pr-14 py-2 text-sm border-r border-border-default group whitespace-nowrap ${
-                activeTabId === tab.id
-                  ? 'bg-bg-default text-text-default'
-                  : 'text-text-muted hover:bg-bg-muted'
-              }`}
-            >
-              <span className={`font-bold text-xs w-12 text-left ${tab.request.method === 'GET' ? 'text-success' : 'text-warning'}`}>
-                  {tab.request.method}
-              </span>
-              <input
-                type="text"
-                value={tab.name}
-                onChange={(e) => {
-                    e.stopPropagation();
-                    dispatch({ type: 'UPDATE_TAB_NAME', payload: { tabId: tab.id, name: e.target.value } });
-                }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-transparent focus:bg-bg-muted outline-none focus:ring-1 focus:ring-brand rounded-sm px-1 py-0.5 max-w-[150px] text-left"
-                aria-label={`Edit tab name for ${tab.name}`}
-              />
-              {tab.request.isAiGenerated && <SparklesIcon className="w-3 h-3 text-brand flex-shrink-0" />}
-              
-              <div className={`absolute top-1/2 right-1.5 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 rounded-md ${activeTabId === tab.id ? 'bg-bg-default' : 'bg-bg-muted'}`}>
+          {tabs.map(tab => {
+            const protocolDisplay = getProtocolDisplay(tab);
+            return (
                 <button
-                    onClick={(e) => handleDuplicateTab(e, tab.id)}
-                    className="p-1 rounded-full hover:bg-border-default"
-                    aria-label={`Duplicate tab ${tab.name}`}
+                key={tab.id}
+                onClick={() => handleSelectTab(tab.id)}
+                className={`relative flex items-center gap-2 pl-4 pr-14 py-2 text-sm border-r border-border-default group whitespace-nowrap ${
+                    activeTabId === tab.id
+                    ? 'bg-bg-default text-text-default'
+                    : 'text-text-muted hover:bg-bg-muted'
+                }`}
                 >
-                    <CopyIcon className="w-3.5 h-3.5" />
+                <span className={`font-bold text-xs w-12 text-left ${protocolDisplay.className}`}>
+                    {protocolDisplay.text}
+                </span>
+                <input
+                    type="text"
+                    value={tab.name}
+                    onChange={(e) => {
+                        e.stopPropagation();
+                        dispatch({ type: 'UPDATE_TAB_NAME', payload: { tabId: tab.id, name: e.target.value } });
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="bg-transparent focus:bg-bg-muted outline-none focus:ring-1 focus:ring-brand rounded-sm px-1 py-0.5 max-w-[150px] text-left"
+                    aria-label={`Edit tab name for ${tab.name}`}
+                />
+                {tab.request.isAiGenerated && <SparklesIcon className="w-3 h-3 text-brand flex-shrink-0" />}
+                
+                <div className={`absolute top-1/2 right-1.5 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 rounded-md ${activeTabId === tab.id ? 'bg-bg-default' : 'bg-bg-muted'}`}>
+                    <button
+                        onClick={(e) => handleDuplicateTab(e, tab.id)}
+                        className="p-1 rounded-full hover:bg-border-default"
+                        aria-label={`Duplicate tab ${tab.name}`}
+                    >
+                        <CopyIcon className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                        onClick={(e) => handleCloseTab(e, tab.id)}
+                        className="p-1 rounded-full hover:bg-border-default"
+                        aria-label={`Close tab ${tab.name}`}
+                    >
+                        <CloseIcon className="w-3.5 h-3.5" />
+                    </button>
+                </div>
                 </button>
-                <button
-                    onClick={(e) => handleCloseTab(e, tab.id)}
-                    className="p-1 rounded-full hover:bg-border-default"
-                    aria-label={`Close tab ${tab.name}`}
-                >
-                    <CloseIcon className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </button>
-          ))}
+            )
+          })}
         </div>
-        <button
-          onClick={handleAddTab}
-          className="p-3 border-l border-border-default text-text-muted hover:bg-bg-muted"
-          aria-label="Add new tab"
-        >
-          <PlusIcon className="w-4 h-4" />
-        </button>
+        <div className="relative" ref={addTabRef}>
+            <button
+            onClick={() => setIsAddTabOpen(!isAddTabOpen)}
+            className="p-3 border-l border-border-default text-text-muted hover:bg-bg-muted"
+            aria-label="Add new tab"
+            >
+            <PlusIcon className="w-4 h-4" />
+            </button>
+            {isAddTabOpen && (
+                <div className="absolute top-full right-0 mt-1 w-48 bg-bg-subtle border border-border-default rounded-md shadow-lg z-10">
+                    <button onClick={() => handleAddTab(Protocol.REST)} className="block w-full text-left px-4 py-2 text-sm text-text-default hover:bg-bg-muted">REST Request</button>
+                    <button onClick={() => handleAddTab(Protocol.GraphQL)} className="block w-full text-left px-4 py-2 text-sm text-text-default hover:bg-bg-muted">GraphQL Request</button>
+                    <button onClick={() => handleAddTab(Protocol.WebSocket)} className="block w-full text-left px-4 py-2 text-sm text-text-default hover:bg-bg-muted">WebSocket</button>
+                </div>
+            )}
+        </div>
       </div>
 
       {/* Tab Content */}

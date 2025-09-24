@@ -3,6 +3,7 @@ import { WorkspaceContext } from '../App';
 import { HistoryIcon, SettingsIcon, TrashIcon, PatchcatLogo, PatchcatLogoIconOnly } from './icons';
 import Tooltip from './Tooltip';
 import { ApiRequest } from '../types';
+import { getMethodColorClass } from '../constants';
 
 interface LeftSidebarProps {
   onOpenSettings: () => void;
@@ -60,7 +61,7 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onOpenSettings, isOpen }) => 
                         className="group flex justify-between items-center p-2 rounded-md cursor-pointer hover:bg-bg-muted"
                         >
                         <div className="flex-grow truncate">
-                            <span className={`font-bold text-xs ${req.method === 'GET' ? 'text-success' : 'text-warning'}`}>{req.method}</span>
+                            <span className={`font-bold text-xs ${getMethodColorClass(req.method)}`}>{req.method}</span>
                             <p className="text-xs text-text-default truncate">{req.name}</p>
                         </div>
                         <button onClick={(e) => handleDeleteHistory(e, req.id)} className="opacity-0 group-hover:opacity-100 text-text-muted hover:text-danger p-1 flex-shrink-0">
