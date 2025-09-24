@@ -217,7 +217,17 @@ const App: React.FC = () => {
                 const loadedWorkspace = JSON.parse(item);
                 // Basic validation
                 if (loadedWorkspace.tabs && loadedWorkspace.settings) {
-                    dispatch({ type: 'LOAD_WORKSPACE', payload: loadedWorkspace });
+                    const defaultWorkspace = getInitialWorkspace();
+                    // Merge loaded workspace with defaults to ensure new fields exist
+                    const migratedWorkspace: Workspace = {
+                        ...defaultWorkspace,
+                        ...loadedWorkspace,
+                        settings: {
+                            ...defaultWorkspace.settings,
+                            ...loadedWorkspace.settings,
+                        },
+                    };
+                    dispatch({ type: 'LOAD_WORKSPACE', payload: migratedWorkspace });
                 } else {
                      dispatch({ type: 'LOAD_WORKSPACE', payload: getInitialWorkspace() });
                 }

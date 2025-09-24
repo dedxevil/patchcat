@@ -107,6 +107,10 @@ export interface Settings {
   theme: Theme;
   font: AppFont;
   aiEnabled: boolean;
+  geminiApiKey: string;
+  globalHeaders: Header[];
+  globalQueryParams: QueryParam[];
+  globalAuth: Auth;
 }
 
 export interface Workspace {

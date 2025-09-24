@@ -1,8 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { ApiRequest, ApiResponse, AiSuggestion } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 const responseSchema = {
     type: Type.ARRAY,
     items: {
@@ -54,7 +52,19 @@ const serializeRequestBody = (body: ApiRequest['body']): string => {
     }
 }
 
-export const analyzeApiCall = async (request: ApiRequest, response: ApiResponse, history: ApiRequest[]): Promise<AiSuggestion[] | null> => {
+export const analyzeApiCall = async (
+    request: ApiRequest, 
+    response: ApiResponse, 
+    history: ApiRequest[],
+    apiKey: string
+): Promise<AiSuggestion[] | null> => {
+    if (!apiKey || apiKey.trim() === '') {
+        console.error("Gemini API key is missing. Cannot perform analysis.");
+        return null;
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+
     try {
         const historySummary = history.slice(0, 5).map(h => `- ${h.method} ${h.name}`).join('\n');
 

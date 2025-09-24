@@ -43,6 +43,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen }) => {
   }
 
   const activeTab = state.tabs.find(t => t.id === state.activeTabId);
+  const isAiKeyMissing = state.settings.aiEnabled && !state.settings.geminiApiKey;
 
   return (
     <div className={`h-full flex flex-col bg-bg-subtle text-sm transition-all duration-300 ease-in-out ${isOpen ? 'p-3' : 'p-0 items-center justify-center'}`}>
@@ -54,6 +55,12 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen }) => {
       {isOpen ? (
         <>
           <div className="flex-grow overflow-y-auto pr-2 space-y-4 w-full">
+            {isAiKeyMissing && (
+                <div className="p-3 rounded-lg bg-warning/20 text-warning">
+                    <p className="font-semibold">Gemini API Key Required</p>
+                    <p>Please add your Google Gemini API key in the Settings panel to enable AI assistance.</p>
+                </div>
+            )}
             {state.aiMessages.map(message => (
               <div key={message.id} className="flex flex-col gap-2">
                 <div className={`p-3 rounded-lg ${

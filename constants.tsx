@@ -1,5 +1,6 @@
 
 
+
 import { Workspace, Theme, AppFont, ApiRequest, Protocol, HttpMethod, TabData } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -41,6 +42,10 @@ export const getInitialWorkspace = (): Workspace => {
             theme: Theme.Supabase,
             font: AppFont.Inter,
             aiEnabled: true,
+            geminiApiKey: '',
+            globalHeaders: [],
+            globalQueryParams: [],
+            globalAuth: { type: 'none' },
         },
         aiMessages: [{
             id: uuidv4(),

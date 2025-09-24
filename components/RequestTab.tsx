@@ -1,5 +1,6 @@
 
 
+
 import React, { useContext, useState } from 'react';
 import { WorkspaceContext } from '../App';
 import { TabData, HttpMethod, Header, QueryParam, Body, FormDataField, ApiResponse, ApiRequest } from '../types';
@@ -134,33 +135,54 @@ const RequestTab: React.FC<RequestTabProps> = ({ tab }) => {
     
     const startTime = Date.now();
     
-    // Construct headers
-    const headers = new Headers();
+    // --- Construct Final URL with Query Params ---
+    // Precedence: Tab UI > Global UI > URL String
+    const baseUrl = request.url.split('?')[0];
+    const urlParams = new URLSearchParams(request.url.split('?')[1] || '');
+    const finalParams = new Map<string, string>();
+
+    // 1. Params from URL string
+    urlParams.forEach((value, key) => finalParams.set(key, value));
+    // 2. Global query params (overwriting URL string ones)
+    state.settings.globalQueryParams.forEach(p => {
+        if (p.enabled && p.key) finalParams.set(p.key, p.value);
+    });
+    // 3. Tab-specific query params (overwriting global and URL string ones)
+    request.queryParams.forEach(p => {
+        if (p.enabled && p.key) finalParams.set(p.key, p.value);
+    });
+    
+    const finalUrl = new URL(baseUrl);
+    finalParams.forEach((value, key) => finalUrl.searchParams.append(key, value));
+
+    // --- Construct Final Headers ---
+    // Precedence: Tab UI > Global UI
+    const finalHeaders = new Map<string, string>();
+    // 1. Global headers
+    state.settings.globalHeaders.forEach(h => {
+        if (h.enabled && h.key) finalHeaders.set(h.key.toLowerCase(), h.value);
+    });
+    // 2. Tab-specific headers (overwriting global ones)
     request.headers.forEach(h => {
-        if (h.enabled && h.key) {
-            headers.append(h.key, h.value);
-        }
+        if (h.enabled && h.key) finalHeaders.set(h.key.toLowerCase(), h.value);
     });
 
-    if (request.auth?.type === 'bearer' && request.auth.token) {
-        headers.append('Authorization', `Bearer ${request.auth.token}`);
+    // --- Determine Final Auth ---
+    // Precedence: Tab auth (if not 'none') > Global Auth
+    const tabAuthIsSet = request.auth && request.auth.type !== 'none';
+    const finalAuth = tabAuthIsSet ? request.auth : state.settings.globalAuth;
+    if (finalAuth?.type === 'bearer' && finalAuth.token) {
+        finalHeaders.set('authorization', `Bearer ${finalAuth.token}`);
     }
 
-    // Construct URL with query params
-    const url = new URL(request.url);
-    request.queryParams.forEach(p => {
-        if (p.enabled && p.key) {
-            url.searchParams.append(p.key, p.value);
-        }
-    });
-
-    // Construct body
+    // --- Construct Body ---
     let body: BodyInit | null = null;
+    let contentTypeFromRawBody: string | null = null;
     if (request.method !== 'GET' && request.method !== 'HEAD') {
         if (request.body.type === 'raw') {
             body = request.body.content;
-            if (!headers.has('Content-Type') && request.body.content) {
-                headers.append('Content-Type', getContentType(request.body.content));
+            if (request.body.content) {
+                contentTypeFromRawBody = getContentType(request.body.content);
             }
         } else if (request.body.type === 'form-data') {
             const formData = new FormData();
@@ -174,14 +196,21 @@ const RequestTab: React.FC<RequestTabProps> = ({ tab }) => {
                 }
             });
             body = formData;
-            // Browser will set Content-Type for FormData automatically
         } else if (request.body.type === 'binary') {
             body = fileInputs['binary_file'] || null;
         }
     }
+    
+    // Set Content-Type from raw body as a fallback if not already present
+    if (contentTypeFromRawBody && !finalHeaders.has('content-type')) {
+        finalHeaders.set('content-type', contentTypeFromRawBody);
+    }
+
+    const headers = new Headers();
+    finalHeaders.forEach((value, key) => headers.append(key, value));
 
     try {
-        const response = await fetch(url.toString(), {
+        const response = await fetch(finalUrl.toString(), {
             method: request.method,
             headers,
             body,
@@ -217,8 +246,8 @@ const RequestTab: React.FC<RequestTabProps> = ({ tab }) => {
         dispatch({ type: 'SET_RESPONSE', payload: { tabId: tab.id, response: apiResponse } });
         dispatch({ type: 'ADD_HISTORY', payload: request });
         
-        // Trigger AI analysis if enabled
-        if (state.settings.aiEnabled) {
+        // Trigger AI analysis if enabled and API key is provided
+        if (state.settings.aiEnabled && state.settings.geminiApiKey) {
             const cacheKey = createAnalysisCacheKey(request, apiResponse);
             if (state.analyzedRequestsCache.includes(cacheKey)) {
                 dispatch({
@@ -231,7 +260,7 @@ const RequestTab: React.FC<RequestTabProps> = ({ tab }) => {
             dispatch({ type: 'ADD_TO_ANALYSIS_CACHE', payload: cacheKey });
             dispatch({ type: 'ADD_AI_MESSAGE', payload: { id: uuidv4(), type: 'thinking', content: 'Analyzing response...' } });
             
-            const suggestions = await analyzeApiCall(request, apiResponse, state.history);
+            const suggestions = await analyzeApiCall(request, apiResponse, state.history, state.settings.geminiApiKey);
             if (suggestions && suggestions.length > 0) {
                 dispatch({
                     type: 'ADD_AI_MESSAGE',
@@ -257,7 +286,7 @@ const RequestTab: React.FC<RequestTabProps> = ({ tab }) => {
                     payload: {
                         id: uuidv4(),
                         type: 'error',
-                        content: "Sorry, I couldn't analyze the response.",
+                        content: "Sorry, I couldn't analyze the response. Please check your Gemini API key in Settings.",
                     }
                 });
             }
@@ -404,6 +433,7 @@ const RequestTab: React.FC<RequestTabProps> = ({ tab }) => {
                     />
                 </div>
             )}
+            <p className="text-xs text-text-muted">Authentication set here overrides the global setting for this request only.</p>
         </div>
     )
   }
