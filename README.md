@@ -12,7 +12,7 @@
 
 > A blazingly fast, browser-based API client for REST, GraphQL, and WebSockets, supercharged with an AI assistant.
 
-![Patchcat Screenshot](https://storage.googleapis.com/aici-prod-user-data/public/a752e259-26d1-4389-9d95-207d6d5337b5.png)
+![Patchcat Screenshot](https://i.ibb.co/C3FCyGmS/patchcat-screenshot.png)
 
 ## 🚀 Introduction
 
