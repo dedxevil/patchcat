@@ -13,7 +13,6 @@ export const THEME_CLASSES: Record<Theme, string> = {
   [Theme.Twitter]: 'theme-twitter',
 };
 
-
 export const APP_FONTS: Record<AppFont, { name: string; className: string }> = {
   [AppFont.Inter]: { name: 'Inter', className: 'font-inter' },
   [AppFont.RobotoMono]: { name: 'Roboto Mono', className: 'font-roboto-mono' },
@@ -93,7 +92,7 @@ export const getInitialWorkspace = (): Workspace => {
         aiMessages: [{
             id: uuidv4(),
             type: 'info',
-            content: "🐱 Meow! Welcome to Patchcat AI! I can help you test your APIs. Make a request, and I'll analyze the response."
+            content: "Welcome to Patchcat AI! I can help you test your APIs. Make a request, and I'll analyze the response."
         }],
         analyzedRequestsCache: [],
     }

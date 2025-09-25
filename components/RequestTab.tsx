@@ -453,7 +453,8 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
             };
 
             dispatch({ type: 'SET_RESPONSE', payload: { tabId: tab.id, response: apiResponse } });
-            dispatch({ type: 'ADD_HISTORY', payload: request });
+            const requestWithStatus = { ...request, status: apiResponse.status };
+            dispatch({ type: 'ADD_HISTORY', payload: requestWithStatus });
             
             if (state.settings.aiEnabled && state.settings.geminiApiKey && !state.analyzedRequestsCache.includes(request.id)) {
                 dispatch({ type: 'ADD_TO_ANALYSIS_CACHE', payload: request.id });
@@ -461,13 +462,21 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
                 const thinkingMessage: AiMessage = { id: uuidv4(), type: 'thinking', content: 'Analyzing response...' };
                 dispatch({ type: 'ADD_AI_MESSAGE', payload: thinkingMessage });
                 
-                const suggestions = await analyzeApiCall(request, apiResponse, state.history, state.settings.geminiApiKey);
+                const analysisResult = await analyzeApiCall(request, apiResponse, state.history, state.settings.geminiApiKey);
 
-                if (suggestions && suggestions.length > 0) {
+                if (analysisResult === 'SKIPPED_LARGE') {
+                    const skippedMessage: AiMessage = {
+                        id: uuidv4(),
+                        type: 'info',
+                        content: "This response is purr-etty big! I'm skipping analysis to save time. No point staring at a giant ball of yarn, right?",
+                    };
+                    dispatch({ type: 'ADD_AI_MESSAGE', payload: skippedMessage });
+                } else if (analysisResult && analysisResult.length > 0) {
+                    const suggestions = analysisResult;
                     const successMessage: AiMessage = {
                         id: uuidv4(),
                         type: 'suggestion',
-                        content: `I found ${suggestions.length} potential test case${suggestions.length > 1 ? 's' : ''} for you based on this response.`,
+                        content: `I've sniffed around this response and found ${suggestions.length} interesting scent trails for you to follow!`,
                         suggestions: suggestions,
                     };
                     dispatch({ type: 'ADD_AI_MESSAGE', payload: successMessage });
@@ -475,7 +484,7 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
                      const infoMessage: AiMessage = {
                         id: uuidv4(),
                         type: 'info',
-                        content: "I've analyzed the response. Everything looks standard, but let me know if you want to explore specific scenarios!",
+                        content: "I've checked out the response. Everything seems to be in order, just a quiet nap spot here. Let me know if you want me to pounce on anything specific!",
                     };
                     dispatch({ type: 'ADD_AI_MESSAGE', payload: infoMessage });
                 }
@@ -492,6 +501,8 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
                 headers: {},
             };
             dispatch({ type: 'SET_RESPONSE', payload: { tabId: tab.id, response: apiResponse } });
+            const requestWithStatus = { ...request, status: apiResponse.status };
+            dispatch({ type: 'ADD_HISTORY', payload: requestWithStatus });
         }
     };
 
@@ -588,16 +599,16 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
                         <div className="flex-shrink-0">
                             {renderConfigPanel()}
                         </div>
-                        <div className="flex-grow border-t border-border-default min-h-0">
+                        <div className="flex flex-col flex-grow border-t border-border-default min-h-0">
                             {isLoading ? (
-                                <div className="flex items-center justify-center h-full text-text-muted">
+                                <div className="flex flex-grow items-center justify-center h-full text-text-muted">
                                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand"></div>
                                     <span className="ml-4">Loading...</span>
                                 </div>
                             ) : response ? (
                                 <ResponsePanel response={response} />
                             ) : (
-                                <div className="flex flex-col items-center justify-center h-full text-center text-text-muted p-4">
+                                <div className="flex flex-col flex-grow items-center justify-center h-full text-center text-text-muted p-4">
                                     <SparklesIcon className="w-12 h-12 mb-4" />
                                     <h2 className="text-lg font-semibold">Ready to make a request?</h2>
                                     <p>Click the 'Send' button to see the response here.</p>

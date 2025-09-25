@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
 
-export function useLocalStorage<T,>(key: string, initialValue: T): [T, (value: T) => void] {
+// Return type for the setter function is updated to be more correct, matching React's own setter type.
+export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((prevState: T) => T)) => void] {
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {
       const item = window.localStorage.getItem(key);
@@ -12,15 +12,6 @@ export function useLocalStorage<T,>(key: string, initialValue: T): [T, (value: T
     }
   });
 
-  const setValue = (value: T) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   useEffect(() => {
     try {
         window.localStorage.setItem(key, JSON.stringify(storedValue));
@@ -29,5 +20,8 @@ export function useLocalStorage<T,>(key: string, initialValue: T): [T, (value: T
     }
   }, [key, storedValue]);
   
-  return [storedValue, setValue];
+  // By returning the setter from useState directly, we guarantee it's a stable function.
+  // The previous implementation created a new, unstable function on every render,
+  // causing state persistence issues.
+  return [storedValue, setStoredValue];
 }

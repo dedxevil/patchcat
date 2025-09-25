@@ -67,28 +67,30 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
     return (
         <div className="space-y-2 p-3 bg-bg-subtle rounded-b-md max-h-60 overflow-y-auto">
             {items.map((item, index) => (
-                <div key={item.id} className="flex flex-wrap items-center gap-2 border-b border-border-default pb-2">
-                    <input
-                        type="checkbox"
-                        className="form-checkbox h-4 w-4 text-brand bg-bg-muted border-border-default rounded focus:ring-brand"
-                        checked={item.enabled}
-                        onChange={(e) => handleGlobalKeyValuePairChange(type, index, 'enabled', e.target.checked)}
-                    />
+                <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
+                    <div className="col-span-1 flex items-center justify-center">
+                        <input
+                            type="checkbox"
+                            className="form-checkbox h-4 w-4 text-brand bg-bg-muted border-border-default rounded focus:ring-brand"
+                            checked={item.enabled}
+                            onChange={(e) => handleGlobalKeyValuePairChange(type, index, 'enabled', e.target.checked)}
+                        />
+                    </div>
                     <input
                         type="text"
                         placeholder="Key"
-                        className="flex-grow min-w-[150px] bg-bg-muted border border-border-default rounded-md px-2 py-1 text-sm focus:ring-1 focus:ring-brand focus:outline-none"
+                        className="col-span-5 bg-bg-muted border border-border-default rounded-md px-2 py-1 text-sm focus:ring-1 focus:ring-brand focus:outline-none"
                         value={item.key}
                         onChange={(e) => handleGlobalKeyValuePairChange(type, index, 'key', e.target.value)}
                     />
                     <input
                         type="text"
                         placeholder="Value"
-                        className="flex-grow min-w-[150px] bg-bg-muted border border-border-default rounded-md px-2 py-1 text-sm focus:ring-1 focus:ring-brand focus:outline-none"
+                        className="col-span-5 bg-bg-muted border border-border-default rounded-md px-2 py-1 text-sm focus:ring-1 focus:ring-brand focus:outline-none"
                         value={item.value}
                         onChange={(e) => handleGlobalKeyValuePairChange(type, index, 'value', e.target.value)}
                     />
-                    <button onClick={() => removeGlobalKeyValuePair(type, index)} className="text-text-muted hover:text-danger p-1">
+                    <button onClick={() => removeGlobalKeyValuePair(type, index)} className="col-span-1 text-text-muted hover:text-danger p-1">
                         <TrashIcon />
                     </button>
                 </div>
@@ -244,7 +246,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
           {/* Workspace Management */}
           <div className="border-t border-border-default pt-4 space-y-2">
             <h3 className="text-sm font-medium text-text-muted mb-2">Workspace Data</h3>
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex gap-2">
                 <button
                     onClick={() => exportWorkspace(state)}
                     className="w-full text-center px-4 py-2 border border-border-default rounded-md text-sm font-medium hover:bg-bg-muted"

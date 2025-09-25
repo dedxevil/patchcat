@@ -57,7 +57,7 @@ const Layout: React.FC = () => {
   const isOverlayVisible = !isDesktop && (leftSidebarOpen || rightSidebarOpen);
 
   return (
-    <div className="h-screen w-screen bg-bg-default text-text-default flex flex-col md:flex-row overflow-hidden">
+    <div className="h-screen w-screen bg-bg-default text-text-default flex flex-col md:flex-row">
         {isOverlayVisible && (
             <div 
                 className="fixed inset-0 bg-black/60 z-30"
@@ -82,7 +82,7 @@ const Layout: React.FC = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="relative flex-grow flex flex-col min-w-0 md:border-l md:border-r border-border-default overflow-hidden">
+      <div className="relative flex-grow flex flex-col min-w-0 md:border-l md:border-r border-border-default">
         <MobileHeader 
             onToggleLeft={() => setLeftSidebarOpen(!leftSidebarOpen)} 
             onToggleRight={() => setRightSidebarOpen(!rightSidebarOpen)}
@@ -92,7 +92,7 @@ const Layout: React.FC = () => {
         {/* Left Sidebar Toggle Button - Desktop */}
         <button
           onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
-          className="absolute top-1/2 -left-[13px] transform -translate-y-1/2 z-20 p-1 rounded-full bg-bg-muted hover:bg-border-default border-2 border-border-default hidden md:block"
+          className="absolute top-1/2 -left-[13px] transform -translate-y-1/2 z-50 p-1 rounded-full bg-bg-muted hover:bg-border-default border-2 border-border-default hidden md:block"
           aria-label={leftSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
         >
           {leftSidebarOpen ? <ChevronLeftIcon className="w-4 h-4" /> : <ChevronRightIcon className="w-4 h-4" />}
@@ -104,7 +104,7 @@ const Layout: React.FC = () => {
         {state.settings.aiEnabled && (
              <button
                 onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
-                className="absolute top-1/2 -right-[13px] transform -translate-y-1/2 z-20 p-1 rounded-full bg-bg-muted hover:bg-border-default border-2 border-border-default hidden md:block"
+                className="absolute top-1/2 -right-[13px] transform -translate-y-1/2 z-50 p-1 rounded-full bg-bg-muted hover:bg-border-default border-2 border-border-default hidden md:block"
                 aria-label={rightSidebarOpen ? 'Collapse AI assistant' : 'Expand AI assistant'}
              >
                 {rightSidebarOpen ? <ChevronRightIcon className="w-4 h-4" /> : <ChevronLeftIcon className="w-4 h-4" />}

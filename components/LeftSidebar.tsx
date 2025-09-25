@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { WorkspaceContext } from '../App';
-import { HistoryIcon, SettingsIcon, TrashIcon, PatchcatLogo, PatchcatLogoIconOnly, CloseIcon } from './icons';
+import { HistoryIcon, SettingsIcon, TrashIcon, PatchcatLogo, PatchcatLogoIconOnly, CloseIcon, CheckCircleIcon, XCircleIcon } from './icons';
 import Tooltip from './Tooltip';
 import { ApiRequest } from '../types';
 import { getMethodColorClass } from '../constants';
@@ -17,7 +17,9 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onOpenSettings, isOpen, setIs
 
   const handleSelectHistory = (request: ApiRequest) => {
     dispatch({ type: 'ADD_TAB', payload: { request } });
-    setIsOpen(false); // Close sidebar on mobile after selection
+    if (window.innerWidth < 768) {
+        setIsOpen(false); // Close sidebar on mobile after selection
+    }
   };
   
   const handleDeleteHistory = (e: React.MouseEvent, requestId: string) => {
@@ -45,11 +47,14 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onOpenSettings, isOpen, setIs
         </button>
       </div>
       <div className="flex-grow overflow-y-auto">
-        {isOpen && (
+        {isOpen ? (
             <div className="p-3">
                 <div className="flex justify-between items-center mb-2">
                     <h2 className="font-semibold flex items-center gap-2">
-                    <HistoryIcon /> History
+                      <Tooltip text="Request History">
+                        <HistoryIcon />
+                      </Tooltip>
+                      History
                     </h2>
                     {history.length > 0 && (
                         <Tooltip text="Clear all history">
@@ -81,6 +86,30 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onOpenSettings, isOpen, setIs
                     ))}
                     </ul>
                 )}
+            </div>
+        ) : (
+             <div className="flex flex-col items-center py-3">
+                {history.length > 0 && (
+                     <Tooltip text="History">
+                         <HistoryIcon className="mb-2" />
+                     </Tooltip>
+                )}
+                <ul className="space-y-1">
+                    {history.map(req => (
+                        <li key={req.id} onClick={() => handleSelectHistory(req)} className="rounded-md cursor-pointer hover:bg-bg-muted">
+                            <Tooltip text={`${req.name} (${req.status ?? 'N/A'})`}>
+                                <div className="flex items-center justify-center gap-2 p-2 w-full">
+                                    <span className={`font-bold text-xs w-10 text-center ${getMethodColorClass(req.method)}`}>{req.method}</span>
+                                    {typeof req.status === 'number' ? (
+                                        (req.status >= 200 && req.status < 400)
+                                            ? <CheckCircleIcon className="w-4 h-4 text-success" />
+                                            : <XCircleIcon className="w-4 h-4 text-danger" />
+                                    ) : <div className="w-4 h-4"></div>}
+                                </div>
+                            </Tooltip>
+                        </li>
+                    ))}
+                </ul>
             </div>
         )}
       </div>

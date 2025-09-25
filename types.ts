@@ -1,3 +1,5 @@
+
+
 export enum HttpMethod {
   GET = 'GET',
   POST = 'POST',
@@ -76,6 +78,7 @@ export interface ApiRequest {
   body: Body;
   auth: Auth;
   isAiGenerated?: boolean;
+  status?: number;
 }
 
 export interface ApiResponse {
@@ -96,6 +99,55 @@ export interface WebSocketMessage {
 
 export type WsStatus = 'disconnected' | 'connecting' | 'connected';
 
+// GraphQL Schema Types
+export interface GraphQLSchema {
+  queryType: { name: string };
+  mutationType?: { name: string };
+  subscriptionType?: { name: string };
+  types: GraphQLType[];
+}
+
+export interface GraphQLType {
+  kind: 'SCALAR' | 'OBJECT' | 'INTERFACE' | 'UNION' | 'ENUM' | 'INPUT_OBJECT' | 'LIST' | 'NON_NULL';
+  name: string;
+  description?: string;
+  fields?: GraphQLField[];
+  inputFields?: GraphQLInputField[];
+  interfaces?: GraphQLTypeRef[];
+  enumValues?: GraphQLEnumValue[];
+  possibleTypes?: GraphQLTypeRef[];
+  ofType?: GraphQLTypeRef;
+}
+
+export interface GraphQLField {
+  name: string;
+  description?: string;
+  args: GraphQLInputField[];
+  type: GraphQLTypeRef;
+  isDeprecated: boolean;
+  deprecationReason?: string;
+}
+
+export interface GraphQLInputField {
+  name: string;
+  description?: string;
+  type: GraphQLTypeRef;
+  defaultValue?: string;
+}
+
+export interface GraphQLEnumValue {
+  name: string;
+  description?: string;
+  isDeprecated: boolean;
+  deprecationReason?: string;
+}
+
+export interface GraphQLTypeRef {
+  kind: string;
+  name?: string;
+  ofType?: GraphQLTypeRef;
+}
+
 export interface TabData {
   id: string;
   name: string;
@@ -105,6 +157,11 @@ export interface TabData {
   // WebSocket specific state
   wsStatus?: WsStatus;
   wsMessages?: WebSocketMessage[];
+  // GraphQL specific state
+  gqlSchema?: GraphQLSchema;
+  gqlSchemaLoading?: boolean;
+  gqlSchemaError?: string;
+  gqlVariables?: string;
 }
 
 export type AiMessageType = 'info' | 'thinking' | 'suggestion' | 'error' | 'user';
