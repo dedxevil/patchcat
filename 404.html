@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patchcat API Client</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" href="/assets/logo-CS2o8DRT.svg">
+    <style>
+      :root {
+        --font-inter: 'Inter', sans-serif;
+        --font-roboto-mono: 'Roboto Mono', monospace;
+        --font-source-code-pro: 'Source Code Pro', monospace;
+      }
+ .theme-supabase {
+        --bg-default: #1c1c1c; --bg-subtle: #232323; --bg-muted: #2a2a2a;
+        --border-default: #363636; --border-strong: #4d4d4d;
+        --text-default: #e5e5e5; --text-muted: #9a9a9a; --text-subtle: #7a7a7a;
+        --brand: #3ecf8e; --brand-hover: #38b880;
+        --danger: #ef4444; --danger-hover: #dc2626;
+        --success: #3ecf8e; --warning: #f59e0b;
+        --syntax-key: #6ee7b7; --syntax-string: #93c5fd; --syntax-number: #f9a8d4; --syntax-boolean: #fde047; --syntax-null: #d8b4fe;
+      }
+.theme-microsoft {
+  /* Purple-tinted dark neutrals (from Teams Fluent palette) */
+  --bg-default: #2b2d40;    /* main background */
+  --bg-subtle:  #32344c;    /* surface */
+  --bg-muted:   #3a3c55;    /* cards / list hover */
+  --border-default: #4a4d6a;
+  --border-strong:  #5b5e7c;
+
+  /* Text */
+  --text-default: #ffffff;
+  --text-muted:  #c8c8e0;
+  --text-subtle: #9fa0c2;
+
+  /* Brand & states */
+  --brand:       #6264a7; /* Teams purple */
+  --brand-hover: #7a7fcf;
+  --danger:      #c4314b;
+  --danger-hover:#d94b63;
+  --success:     #43b581; /* Fluent success green */
+  --warning:     #f8d22a;
+
+  /* Syntax highlighting */
+  --syntax-key:     #9cdcfe;
+  --syntax-string:  #ce9178;
+  --syntax-number:  #b5cea8;
+  --syntax-boolean: #569cd6;
+  --syntax-null:    #c586c0;
+}
+
+.theme-google {
+  /* Light neutrals */
+  --bg-default: #ffffff;    /* page background */
+  --bg-subtle:  #f8f9fa;    /* card / surface */
+  --bg-muted:   #e8eaed;    /* subtle separators */
+  --border-default: #dadce0;
+  --border-strong:  #bdc1c6;
+
+  /* Text */
+  --text-default: #202124;  /* primary text */
+  --text-muted:  #5f6368;
+  --text-subtle: #80868b;
+
+  /* Google “G” logo colors for accents */
+  --brand:       #4285f4; /* blue */
+  --brand-hover: #5a95f5;
+  --danger:      #ea4335; /* red */
+  --danger-hover:#d93025;
+  --success:     #34a853; /* green */
+  --warning:     #fbbc05; /* yellow */
+
+  /* Syntax / code highlight */
+  --syntax-key:     #1a73e8;
+  --syntax-string:  #188038;
+  --syntax-number:  #e37400;
+  --syntax-boolean: #f9ab00;
+  --syntax-null:    #a142f4;
+}
+
+.theme-slack {
+  --bg-default: #1e1f22;
+  --bg-subtle:  #232429;
+  --bg-muted:   #2b2c31;
+  --border-default: #3a3b41;
+  --border-strong:  #505159;
+
+  --text-default: #ffffff;
+  --text-muted:  #d1d2d5;
+  --text-subtle: #a8a9ad;
+
+  --brand:       #4a154b; /* Slack purple */
+  --brand-hover: #611f69;
+  --danger:      #e01e5a;
+  --danger-hover:#c51c4a;
+  --success:     #36c5f0;
+  --warning:     #ecb22e;
+
+  --syntax-key:     #ff79c6;
+  --syntax-string:  #50fa7b;
+  --syntax-number:  #f1fa8c;
+  --syntax-boolean: #8be9fd;
+  --syntax-null:    #bd93f9;
+}
+
+.theme-github {
+  --bg-default: #ffffff;
+  --bg-subtle:  #f6f8fa;
+  --bg-muted:   #eaeef2;
+  --border-default: #d0d7de;
+  --border-strong:  #b6bec6;
+
+  --text-default: #24292f;
+  --text-muted:  #57606a;
+  --text-subtle: #6e7781;
+
+  --brand:       #238636; /* GitHub green */
+  --brand-hover: #2ea043;
+  --danger:      #cf222e;
+  --danger-hover:#a40e26;
+  --success:     #2da44e;
+  --warning:     #bf8700;
+
+  --syntax-key:     #d73a49;
+  --syntax-string:  #032f62;
+  --syntax-number:  #005cc5;
+  --syntax-boolean: #6f42c1;
+  --syntax-null:    #e36209;
+}
+
+.theme-discord {
+  --bg-default: #2f3136;
+  --bg-subtle:  #36393f;
+  --bg-muted:   #40444b;
+  --border-default: #4f545c;
+  --border-strong:  #5c6067;
+
+  --text-default: #ffffff;
+  --text-muted:  #b9bbbe;
+  --text-subtle: #8e9297;
+
+  --brand:       #5865f2;
+  --brand-hover: #4752c4;
+  --danger:      #ed4245;
+  --danger-hover:#c73c3e;
+  --success:     #57f287;
+  --warning:     #fee75c;
+
+  --syntax-key:     #8be9fd;
+  --syntax-string:  #50fa7b;
+  --syntax-number:  #f1fa8c;
+  --syntax-boolean: #bd93f9;
+  --syntax-null:    #ff79c6;
+}
+
+.theme-notion {
+  --bg-default: #ffffff;
+  --bg-subtle:  #f7f6f3;
+  --bg-muted:   #efeeeb;
+  --border-default: #e3e2df;
+  --border-strong:  #d1cfcc;
+
+  --text-default: #2f3437;
+  --text-muted:  #787774;
+  --text-subtle: #9b9a97;
+
+  --brand:       #000000; /* Notion black */
+  --brand-hover: #1a1a1a;
+  --danger:      #e03e3e;
+  --danger-hover:#c73434;
+  --success:     #0f7b6c;
+  --warning:     #f5a623;
+
+  --syntax-key:     #005cc5;
+  --syntax-string:  #22863a;
+  --syntax-number:  #e36209;
+  --syntax-boolean: #6f42c1;
+  --syntax-null:    #d73a49;
+}
+
+.theme-spotify {
+  --bg-default: #121212;
+  --bg-subtle:  #181818;
+  --bg-muted:   #202020;
+  --border-default: #282828;
+  --border-strong:  #404040;
+
+  --text-default: #ffffff;
+  --text-muted:  #b3b3b3;
+  --text-subtle: #8f8f8f;
+
+  --brand:       #1db954;
+  --brand-hover: #1ed760;
+  --danger:      #e91429;
+  --danger-hover:#c81224;
+  --success:     #1db954;
+  --warning:     #ffa42b;
+
+  --syntax-key:     #1db954;
+  --syntax-string:  #a5ff90;
+  --syntax-number:  #ffa42b;
+  --syntax-boolean: #f9f871;
+  --syntax-null:    #b084eb;
+}
+
+.theme-twitter {
+  --bg-default: #ffffff;
+  --bg-subtle:  #f5f8fa;
+  --bg-muted:   #e1e8ed;
+  --border-default: #ccd6dd;
+  --border-strong:  #aab8c2;
+
+  --text-default: #14171a;
+  --text-muted:  #657786;
+  --text-subtle: #8899a6;
+
+  --brand:       #1da1f2;
+  --brand-hover: #0d95e8;
+  --danger:      #e0245e;
+  --danger-hover:#c21c50;
+  --success:     #17bf63;
+  --warning:     #ffad1f;
+
+  --syntax-key:     #1da1f2;
+  --syntax-string:  #17bf63;
+  --syntax-number:  #ffad1f;
+  --syntax-boolean: #e0245e;
+  --syntax-null:    #794bc4;
+}
+
+      /* Custom variable utilities */
+      .bg-bg-default { background-color: var(--bg-default); }
+      .bg-bg-subtle { background-color: var(--bg-subtle); }
+      .bg-bg-muted { background-color: var(--bg-muted); }
+      .hover\:bg-bg-muted:hover { background-color: var(--bg-muted); }
+      .text-text-default { color: var(--text-default); }
+      .text-text-muted { color: var(--text-muted); }
+      .text-text-subtle { color: var(--text-subtle); }
+      .border-border-default { border-color: var(--border-default); }
+      .border-border-strong { border-color: var(--border-strong); }
+      .border-brand { border-color: var(--brand); }
+      .text-brand { color: var(--brand); }
+      .hover\:text-brand:hover { color: var(--brand); }
+      .bg-brand { background-color: var(--brand); }
+      .hover\:bg-brand:hover { background-color: var(--brand); }
+      .hover\:bg-brand-hover:hover { background-color: var(--brand-hover); }
+      .text-danger { color: var(--danger); }
+      .hover\:text-danger:hover { color: var(--danger); }
+      .bg-danger { background-color: var(--danger); }
+      .hover\:bg-danger-hover:hover { background-color: var(--danger-hover); }
+      .text-success { color: var(--success); }
+      .text-warning { color: var(--warning); }
+      .hover\:bg-border-default:hover { background-color: var(--border-default); }
+      .focus\:ring-brand:focus { --tw-ring-color: var(--brand); }
+/* ===================== SUPABASE ===================== */
+.theme-supabase .bg-brand\/20 { background-color: rgba(62, 207, 142, 0.2); }
+.theme-supabase .hover\:bg-brand\/40:hover { background-color: rgba(62, 207, 142, 0.4); }
+
+/* ===================== MICROSOFT TEAMS ===================== */
+.theme-microsoft .bg-brand\/20 { background-color: rgba(98, 100, 167, 0.2); }
+.theme-microsoft .hover\:bg-brand\/40:hover { background-color: rgba(98, 100, 167, 0.4); }
+
+/* ===================== GOOGLE (Gmail / Light) ===================== */
+.theme-google .bg-brand\/20 { background-color: rgba(66, 133, 244, 0.2); }
+.theme-google .hover\:bg-brand\/40:hover { background-color: rgba(66, 133, 244, 0.4); }
+
+/* ===================== SLACK ===================== */
+.theme-slack .bg-brand\/20 { background-color: rgba(74, 21, 75, 0.2); }
+.theme-slack .hover\:bg-brand\/40:hover { background-color: rgba(74, 21, 75, 0.4); }
+
+/* ===================== GITHUB ===================== */
+.theme-github .bg-brand\/20 { background-color: rgba(35, 134, 54, 0.2); }
+.theme-github .hover\:bg-brand\/40:hover { background-color: rgba(35, 134, 54, 0.4); }
+
+/* ===================== DISCORD ===================== */
+.theme-discord .bg-brand\/20 { background-color: rgba(88, 101, 242, 0.2); }
+.theme-discord .hover\:bg-brand\/40:hover { background-color: rgba(88, 101, 242, 0.4); }
+
+/* ===================== NOTION ===================== */
+.theme-notion .bg-brand\/20 { background-color: rgba(0, 0, 0, 0.1); }
+.theme-notion .hover\:bg-brand\/40:hover { background-color: rgba(0, 0, 0, 0.2); }
+
+/* ===================== SPOTIFY ===================== */
+.theme-spotify .bg-brand\/20 { background-color: rgba(29, 185, 84, 0.2); }
+.theme-spotify .hover\:bg-brand\/40:hover { background-color: rgba(29, 185, 84, 0.4); }
+
+/* ===================== TWITTER/X ===================== */
+.theme-twitter .bg-brand\/20 { background-color: rgba(29, 161, 242, 0.2); }
+.theme-twitter .hover\:bg-brand\/40:hover { background-color: rgba(29, 161, 242, 0.4); }
+
+
+      /* Syntax Highlighting Utilities */
+      .text-syntax-key { color: var(--syntax-key); }
+      .text-syntax-string { color: var(--syntax-string); }
+      .text-syntax-number { color: var(--syntax-number); }
+      .text-syntax-boolean { color: var(--syntax-boolean); }
+      .text-syntax-null { color: var(--syntax-null); }
+
+      .font-inter { font-family: var(--font-inter); }
+      .font-roboto-mono { font-family: var(--font-roboto-mono); }
+      .font-source-code-pro { font-family: var(--font-source-code-pro); }
+      .tooltip-container .tooltip-text { visibility: hidden; opacity: 0; transition: opacity 0.2s; }
+      .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
+      
+      /* Custom Scrollbars */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg-default);
+      }
+      ::-webkit-scrollbar-thumb {
+        background-color: var(--border-strong);
+        border-radius: 4px;
+        border: 2px solid var(--bg-default);
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: var(--border-default);
+      }
+    </style>
+
+<link rel="stylesheet" href="/index.css">
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.20.0",
+    "uuid": "https://aistudiocdn.com/uuid@^13.0.0"
+  }
+}
+</script>
+  <script type="module" crossorigin src="/assets/index-COh45tKE.js"></script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
