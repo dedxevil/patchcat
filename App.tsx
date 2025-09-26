@@ -303,10 +303,15 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
   })();
 
   // Persist state to localStorage on every update, except for the initial load.
-  // This is done synchronously within the reducer to prevent race conditions.
   if (action.type !== 'LOAD_WORKSPACE') {
     try {
-      window.localStorage.setItem('patchcat-workspace', JSON.stringify(newState));
+      // Create a copy of the state and reset isLoading flags to prevent
+      // persisted loading state on page refresh.
+      const stateToPersist = {
+        ...newState,
+        tabs: newState.tabs.map(tab => ({ ...tab, isLoading: false })),
+      };
+      window.localStorage.setItem('patchcat-workspace', JSON.stringify(stateToPersist));
     } catch (error) {
       console.error("Failed to save workspace to localStorage", error);
     }

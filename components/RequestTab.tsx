@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { WorkspaceContext } from '../App';
 import { TabData, Header, QueryParam, HttpMethod, Body, ApiRequest, ApiResponse, AiMessage, Protocol, FormDataField, Auth } from '../types';
 import { SendIcon, SparklesIcon, PlusIcon, TrashIcon } from './icons';
@@ -345,6 +345,7 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
     const [activeConfigTab, setActiveConfigTab] = useState<RequestConfigTab>('params');
     const [fileObjects, setFileObjects] = useState<Record<string, File | null>>({});
     const [binaryFile, setBinaryFile] = useState<File | null>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
     
     useEffect(() => {
         // Clear local file state when tab ID changes to prevent cross-tab contamination
@@ -360,8 +361,17 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
         handleRequestChange({ protocol });
     };
 
+    const handleCancelRequest = () => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+    };
+
     const handleSendRequest = async () => {
         dispatch({ type: 'SET_LOADING', payload: { tabId: tab.id, isLoading: true } });
+        
+        abortControllerRef.current = new AbortController();
+        const signal = abortControllerRef.current.signal;
 
         const resolveAuth = (): Auth => {
             const tabAuth = request.auth;
@@ -424,6 +434,7 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
                 method: request.method,
                 headers,
                 body,
+                signal,
             });
 
             const endTime = Date.now();
@@ -492,17 +503,29 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
 
         } catch (error: any) {
             const endTime = Date.now();
-            const apiResponse: ApiResponse = {
-                status: 0,
-                statusText: 'Network Error',
-                time: endTime - startTime,
-                size: 0,
-                data: { error: 'Could not connect', message: error.message },
-                headers: {},
-            };
-            dispatch({ type: 'SET_RESPONSE', payload: { tabId: tab.id, response: apiResponse } });
-            const requestWithStatus = { ...request, status: apiResponse.status };
-            dispatch({ type: 'ADD_HISTORY', payload: requestWithStatus });
+            if (error.name === 'AbortError') {
+                const apiResponse: ApiResponse = {
+                    status: 0,
+                    statusText: 'Request Cancelled',
+                    time: endTime - startTime,
+                    size: 0,
+                    data: { error: 'Request was cancelled by the user.' },
+                    headers: {},
+                };
+                dispatch({ type: 'SET_RESPONSE', payload: { tabId: tab.id, response: apiResponse } });
+            } else {
+                const apiResponse: ApiResponse = {
+                    status: 0,
+                    statusText: 'Network Error',
+                    time: endTime - startTime,
+                    size: 0,
+                    data: { error: 'Could not connect', message: error.message },
+                    headers: {},
+                };
+                dispatch({ type: 'SET_RESPONSE', payload: { tabId: tab.id, response: apiResponse } });
+                const requestWithStatus = { ...request, status: apiResponse.status };
+                dispatch({ type: 'ADD_HISTORY', payload: requestWithStatus });
+            }
         }
     };
 
@@ -575,14 +598,24 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
                     className="flex-grow-[999] min-w-[200px] w-full md:w-auto p-2 bg-bg-subtle border border-border-default rounded-md text-sm focus:ring-1 focus:ring-brand focus:outline-none"
                 />
                 {isHttpProtocol && (
-                    <button
-                        onClick={handleSendRequest}
-                        disabled={isLoading}
-                        className="flex items-center justify-center gap-2 px-4 py-2 bg-brand text-white rounded-md font-semibold text-sm hover:bg-brand-hover disabled:bg-brand/50 disabled:cursor-not-allowed flex-grow-[1] w-full sm:w-auto"
-                    >
-                        <SendIcon className="w-4 h-4" />
-                        {isLoading ? 'Sending...' : 'Send'}
-                    </button>
+                    <div className="flex items-stretch gap-2 flex-grow-[1] w-full sm:w-auto">
+                        <button
+                            onClick={handleSendRequest}
+                            disabled={isLoading}
+                            className="flex-grow flex items-center justify-center gap-2 px-4 py-2 bg-brand text-white rounded-md font-semibold text-sm hover:bg-brand-hover disabled:bg-brand/50 disabled:cursor-not-allowed"
+                        >
+                            <SendIcon className="w-4 h-4" />
+                            {isLoading ? 'Sending...' : 'Send'}
+                        </button>
+                        {isLoading && (
+                            <button
+                                onClick={handleCancelRequest}
+                                className="flex-shrink-0 flex items-center justify-center px-4 py-2 bg-danger text-white rounded-md font-semibold text-sm hover:bg-danger-hover"
+                            >
+                                Cancel
+                            </button>
+                        )}
+                    </div>
                 )}
             </div>
 
