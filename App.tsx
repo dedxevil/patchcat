@@ -50,7 +50,7 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
             // Start with sensible defaults
             id: uuidv4(),
             protocol: protocolForNewTab,
-            url: protocolForNewTab === Protocol.WebSocket ? 'wss://socketsbay.com/wss/v2/1/demo/' : 'https://jsonplaceholder.typicode.com/todos/1',
+            url: 'https://jsonplaceholder.typicode.com/todos/1',
             method: HttpMethod.GET,
             headers: [],
             queryParams: [],
@@ -62,16 +62,23 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
           },
         };
         
-        // Add WebSocket-specific properties if the final protocol is WebSocket
+        // Add protocol-specific properties
         if (newTab.request.protocol === Protocol.WebSocket) {
           newTab.wsStatus = 'disconnected';
           newTab.wsMessages = [];
+          newTab.request.url = 'wss://socketsbay.com/wss/v2/1/demo/';
         }
         
         if (newTab.request.protocol === Protocol.GraphQL) {
           newTab.gqlVariables = '{\n  "id": 1\n}';
           newTab.request.method = HttpMethod.POST;
           newTab.request.body = { type: 'raw', content: 'query GetTodo($id: ID!) {\n  todo(id: $id) {\n    id\n    title\n    completed\n  }\n}' };
+        }
+        
+        if (newTab.request.protocol === Protocol.MCP) {
+          newTab.request.url = 'mcp://device.local:4000';
+          newTab.request.method = 'GET_STATUS';
+          newTab.request.body = { type: 'raw', content: '' };
         }
 
         return {
@@ -185,6 +192,10 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
                               tab.wsMessages = [];
                           } else if (request.protocol === Protocol.REST) {
                               updatedRequest.url = 'https://jsonplaceholder.typicode.com/todos/1';
+                          } else if (request.protocol === Protocol.MCP) {
+                              updatedRequest.url = 'mcp://device.local:4000';
+                              updatedRequest.method = 'GET_STATUS';
+                              updatedRequest.body = { type: 'raw', content: '' };
                           }
                       }
                       return { ...tab, request: updatedRequest };

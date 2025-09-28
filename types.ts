@@ -14,6 +14,7 @@ export enum Protocol {
   REST = 'REST',
   GraphQL = 'GraphQL',
   WebSocket = 'WebSocket',
+  MCP = 'MCP',
 }
 
 export enum Theme {
@@ -72,7 +73,7 @@ export interface ApiRequest {
   name: string;
   protocol: Protocol;
   url: string;
-  method: HttpMethod;
+  method: HttpMethod | string; // Allow string for MCP commands
   headers: Header[];
   queryParams: QueryParam[];
   body: Body;

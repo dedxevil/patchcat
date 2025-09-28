@@ -1,4 +1,5 @@
 
+
 import React, { useContext, useState, useRef, useEffect } from 'react';
 import { WorkspaceContext } from '../App';
 import RequestTab from './RequestTab';
@@ -48,11 +49,13 @@ const MainPanel: React.FC = () => {
   const getProtocolDisplay = (tab: (typeof tabs)[0]) => {
       switch (tab.request.protocol) {
           case Protocol.REST:
-              return { text: tab.request.method, className: getMethodColorClass(tab.request.method) };
+              return { text: tab.request.method, className: getMethodColorClass(tab.request.method as any) };
           case Protocol.GraphQL:
               return { text: 'GQL', className: 'text-purple-400' };
           case Protocol.WebSocket:
               return { text: 'WS', className: 'text-blue-400' };
+          case Protocol.MCP:
+              return { text: 'MCP', className: 'text-orange-400' };
           default:
               return { text: 'N/A', className: 'text-text-subtle' };
       }
@@ -124,6 +127,7 @@ const MainPanel: React.FC = () => {
                     <button onClick={() => handleAddTab(Protocol.REST)} className="block w-full text-left px-4 py-2 text-sm text-text-default hover:bg-bg-muted">REST Request</button>
                     <button onClick={() => handleAddTab(Protocol.GraphQL)} className="block w-full text-left px-4 py-2 text-sm text-text-default hover:bg-bg-muted">GraphQL Request</button>
                     <button onClick={() => handleAddTab(Protocol.WebSocket)} className="block w-full text-left px-4 py-2 text-sm text-text-default hover:bg-bg-muted">WebSocket</button>
+                    <button onClick={() => handleAddTab(Protocol.MCP)} className="block w-full text-left px-4 py-2 text-sm text-text-default hover:bg-bg-muted">MCP Command</button>
                 </div>
             )}
         </div>

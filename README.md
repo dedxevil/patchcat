@@ -10,45 +10,53 @@
   <img alt="License" src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" />
 </p>
 
-> A blazingly fast, browser-based API client for REST, GraphQL, and WebSockets, supercharged with an AI assistant.
+> A blazingly fast, browser-based API client for REST, GraphQL, WebSockets, and custom protocols, supercharged with an AI assistant. An open-source, privacy-first alternative to Postman and Hoppscotch.
 
 ![Patchcat Screenshot](https://i.ibb.co/C3FCyGmS/patchcat-screenshot.png)
 
-## 🚀 Introduction
+## 🚀 The Perfect Open-Source Alternative to Postman and Hoppscotch
 
-Patchcat is a modern, Postman-like API client that runs entirely in your browser. No installation, no accounts, no cloud sync—just a powerful tool to test your APIs with a focus on speed and developer experience. Built with React and TypeScript, it leverages your browser's local storage to persist your work, offering a seamless and private testing environment.
+Patchcat is a modern API client that runs entirely in your browser. It's the lightweight, no-installation Postman alternative you've been waiting for. If you're looking for a free API client that respects your privacy and offers powerful features without the bloat, Patchcat is for you.
 
-Whether you're debugging a complex GraphQL endpoint, monitoring a WebSocket feed, or simply hitting a REST API, Patchcat provides a clean, intuitive, and feature-rich interface to get the job done.
+Why choose Patchcat over other API testing tools like Postman, Hoppscotch, or Insomnia?
+
+-   **Zero Installation, Zero Accounts**: Patchcat is a browser-based API testing tool. No downloads, no sign-ups. Just open the URL and start working. It's the ultimate lightweight API tool.
+-   **100% Private and Secure**: All your requests, history, and settings are stored exclusively in your browser's local storage. No cloud sync, no data collection. A true privacy-focused API client.
+-   **Blazingly Fast**: Built with a minimal footprint, the interface is incredibly responsive. Test your APIs without the lag of heavy desktop applications.
+-   **AI-Powered Assistance**: Patchcat isn't just a REST client; it's an intelligent API development partner. Integrated with the Gemini API, it analyzes responses to suggest test cases, making your API debugging workflow smarter and faster.
+-   **Truly Portable**: Export your entire workspace to a single JSON file. Move between machines or share your setup with colleagues effortlessly.
+
+Patchcat is designed for developers who need a powerful API sandbox without the overhead. It's the ideal free Postman alternative for modern web development.
 
 ## ✨ Key Features
 
-- **Multi-Protocol Support**: First-class support for **REST**, **GraphQL**, and **WebSockets** in a unified interface.
-- **AI-Powered Assistant**: Integrated with Google's Gemini API to automatically analyze responses and suggest relevant test cases for edge cases, validation, and error handling.
-- **Advanced GraphQL Client**:
-    - Automatic schema introspection.
-    - Interactive schema explorer.
-    - Autocompletion for queries and variables based on the fetched schema (coming soon!).
-- **Real-time WebSocket Client**:
-    - Connect to `ws://` and `wss://` endpoints.
-    - View a real-time log of sent and received messages.
-    - Send messages interactively.
-- **Comprehensive REST Client**:
-    - Full support for all standard HTTP methods (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, etc.).
-    - Easy-to-use editors for query parameters, headers, and various body types (`raw`, `form-data`, `binary/file-upload`).
-- **Flexible Authentication**: Configure authentication globally or override on a per-tab basis. Supports Bearer Token.
-- **Intuitive Multi-Tab Interface**: Organize your workflow with multiple tabs. Duplicate, rename, and manage your requests with ease.
-- **Request History**: Automatically saves a log of your sent requests for quick re-use.
-- **Zero Backend, 100% Private**: Runs entirely in your browser. All data is stored in your local storage, ensuring your work remains private.
-- **Customizable UI**: Switch between multiple themes (Supabase, VS Code, Google Material) and fonts to tailor the experience to your liking.
-- **Workspace Portability**: Easily export your entire workspace (tabs, history, settings) to a JSON file and import it on another machine.
+-   **Multi-Protocol Support**: First-class support for **REST**, **GraphQL**, **WebSockets**, and custom **MCP (Meta-Control Protocol)** in a unified interface.
+-   **AI-Powered Assistant**: Integrated with Google's Gemini API to automatically analyze responses and suggest relevant test cases for edge cases, validation, and error handling.
+-   **Advanced GraphQL Client**:
+    -   Automatic schema introspection.
+    -   Interactive schema explorer.
+-   **Real-time WebSocket Client**:
+    -   Connect to `ws://` and `wss://` endpoints.
+    -   View a real-time log of sent and received messages.
+-   **Custom Protocol Testing (MCP)**:
+    -   Test simple text-based command-response protocols, perfect for IoT, game servers, or custom daemons.
+    -   Define custom commands and payloads.
+-   **Comprehensive REST Client**:
+    -   Full support for all standard HTTP methods (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, etc.).
+    -   Easy editors for query parameters, headers, and various body types (`raw`, `form-data`, `binary/file-upload`).
+-   **Flexible Authentication**: Configure authentication globally (Bearer Token) or override on a per-tab basis.
+-   **Intuitive Multi-Tab Interface**: Organize your workflow with multiple tabs. Duplicate, rename, and manage your requests with ease.
+-   **Request History**: Automatically saves a log of your sent requests for quick re-use.
+-   **Customizable UI**: Switch between multiple themes and fonts to tailor the experience to your liking.
+-   **Workspace Portability**: Easily export and import your entire workspace.
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: [React](https://reactjs.org/) & [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **State Management**: React Context with `useReducer`
-- **AI Integration**: [Google Gemini API](https://ai.google.dev/)
-- **Dependencies**: Loaded via `importmap` for a build-free development experience.
+-   **Frontend**: [React](https://reactjs.org/) & [TypeScript](https://www.typescriptlang.org/)
+-   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+-   **State Management**: React Context with `useReducer`
+-   **AI Integration**: [Google Gemini API](https://ai.google.dev/)
+-   **Dependencies**: Loaded via `importmap` for a build-free development experience.
 
 ## 🚀 Getting Started
 
@@ -63,17 +71,17 @@ cd patchcat-api-client
 **2. Serve the files:**
 You can use any simple static file server. Here are a couple of options:
 
-- **Using `npx` (no installation required):**
-  ```bash
-  npx serve
-  ```
-- **Using Python:**
-  ```bash
-  # Python 3
-  python -m http.server
-  # Python 2
-  python -m SimpleHTTPServer
-  ```
+-   **Using `npx` (no installation required):**
+    ```bash
+    npx serve
+    ```
+-   **Using Python:**
+    ```bash
+    # Python 3
+    python -m http.server
+    # Python 2
+    python -m SimpleHTTPServer
+    ```
 
 **3. Open in your browser:**
 Navigate to the local URL provided by your server (e.g., `http://localhost:3000`).

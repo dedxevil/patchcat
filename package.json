@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "http://dedxevil.github.io/patchcat",
+  "homepage": "https://patchc.at",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
