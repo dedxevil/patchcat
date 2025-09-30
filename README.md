@@ -33,8 +33,9 @@ Patchcat is designed for developers who need a powerful API sandbox without the 
 -   **Multi-Protocol Support**: First-class support for **REST**, **GraphQL**, and **WebSockets** in a unified interface.
 -   **AI-Powered Assistant**: Integrated with Google's Gemini API to automatically analyze responses and suggest relevant test cases for edge cases, validation, and error handling.
 -   **Advanced GraphQL Client**:
+    -   Support for both **queries and mutations**.
     -   Automatic schema introspection.
-    -   Interactive schema explorer.
+    -   Interactive schema explorer with one-click code generation.
 -   **Real-time WebSocket Client**:
     -   Connect to `ws://` and `wss://` endpoints.
     -   View a real-time log of sent and received messages.

@@ -1,14 +1,22 @@
+
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { WorkspaceContext } from '../App';
 import { TabData, Header, QueryParam, HttpMethod, Body, ApiRequest, ApiResponse, AiMessage, Protocol, FormDataField, Auth } from '../types';
 import { SendIcon, SparklesIcon, PlusIcon, TrashIcon } from './icons';
 import ResponsePanel from './ResponsePanel';
 import WebSocketPanel from './WebSocketPanel';
+import GraphQLPanel from './GraphQLPanel';
 import { getMethodSelectClasses, getMethodColorClass } from '../constants';
 import { v4 as uuidv4 } from 'uuid';
 import { analyzeApiCall } from '../services/geminiService';
 
 type RequestConfigTab = 'params' | 'headers' | 'body' | 'auth';
+
+const getGqlOperationName = (query: string): string | null => {
+  if (!query) return null;
+  const match = query.match(/(?:query|mutation)\s+([_A-Za-z][_0-9A-Za-z]*)(?:\s*\(.*?\))?\s*\{/);
+  return match ? match[1] : null;
+};
 
 const KeyValueEditor: React.FC<{
     items: (Header | QueryParam)[];
@@ -398,32 +406,53 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
 
             let body: BodyInit | null = null;
             if (![HttpMethod.GET, HttpMethod.HEAD].includes(request.method as HttpMethod)) {
-                if (request.body.type === 'raw' && request.body.content) {
-                    body = request.body.content;
-                    if (!headers.has('Content-Type')) {
-                        headers.append('Content-Type', 'application/json');
+                if (request.protocol === Protocol.GraphQL) {
+                    try {
+                        const variables = tab.gqlVariables ? JSON.parse(tab.gqlVariables) : {};
+                        body = JSON.stringify({
+                            query: request.body.type === 'raw' ? request.body.content : '',
+                            variables,
+                        });
+                        if (!headers.has('Content-Type')) {
+                            headers.append('Content-Type', 'application/json');
+                        }
+                    } catch (e) {
+                         const errorResponse: ApiResponse = {
+                            status: 0, statusText: 'Client Error', time: 0, size: 0,
+                            data: { error: "Invalid JSON in variables." }, headers: {},
+                        };
+                        dispatch({ type: 'SET_RESPONSE', payload: { tabId: tab.id, response: errorResponse } });
+                        dispatch({ type: 'SET_LOADING', payload: { tabId: tab.id, isLoading: false } });
+                        return;
                     }
-                } else if (request.body.type === 'form-data') {
-                    const formData = new FormData();
-                    request.body.fields.forEach(field => {
-                        if (field.enabled && field.key) {
-                            if (field.type === 'text') {
-                                formData.append(field.key, field.value);
-                            } else {
-                                const file = fileObjects[field.id];
-                                if (file) {
-                                    formData.append(field.key, file, file.name);
+                } else { // REST protocol body logic
+                    if (request.body.type === 'raw' && request.body.content) {
+                        body = request.body.content;
+                        if (!headers.has('Content-Type')) {
+                            headers.append('Content-Type', 'application/json');
+                        }
+                    } else if (request.body.type === 'form-data') {
+                        const formData = new FormData();
+                        request.body.fields.forEach(field => {
+                            if (field.enabled && field.key) {
+                                if (field.type === 'text') {
+                                    formData.append(field.key, field.value);
+                                } else {
+                                    const file = fileObjects[field.id];
+                                    if (file) {
+                                        formData.append(field.key, file, file.name);
+                                    }
                                 }
                             }
-                        }
-                    });
-                    body = formData;
-                    headers.delete('Content-Type');
-                } else if (request.body.type === 'binary') {
-                    if (binaryFile) {
-                        body = binaryFile;
-                        if (!headers.has('Content-Type')) {
-                            headers.append('Content-Type', binaryFile.type || 'application/octet-stream');
+                        });
+                        body = formData;
+                        headers.delete('Content-Type');
+                    } else if (request.body.type === 'binary') {
+                        if (binaryFile) {
+                            body = binaryFile;
+                            if (!headers.has('Content-Type')) {
+                                headers.append('Content-Type', binaryFile.type || 'application/octet-stream');
+                            }
                         }
                     }
                 }
@@ -465,7 +494,15 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
                 };
 
                 dispatch({ type: 'SET_RESPONSE', payload: { tabId: tab.id, response: apiResponse } });
-                const requestWithStatus = { ...request, status: apiResponse.status };
+                const requestWithStatus: ApiRequest = { ...request, id: uuidv4(), status: apiResponse.status };
+
+                if (request.protocol === Protocol.GraphQL && request.body.type === 'raw') {
+                    const operationName = getGqlOperationName(request.body.content);
+                    if (operationName) {
+                        requestWithStatus.operationName = operationName;
+                    }
+                }
+
                 dispatch({ type: 'ADD_HISTORY', payload: requestWithStatus });
                 
                 if (state.settings.aiEnabled && state.settings.geminiApiKey && !state.analyzedRequestsCache.includes(request.id)) {
@@ -524,7 +561,7 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
                         headers: {},
                     };
                     dispatch({ type: 'SET_RESPONSE', payload: { tabId: tab.id, response: apiResponse } });
-                    const requestWithStatus = { ...request, status: apiResponse.status };
+                    const requestWithStatus = { ...request, id: uuidv4(), status: apiResponse.status };
                     dispatch({ type: 'ADD_HISTORY', payload: requestWithStatus });
                 }
             }
@@ -558,6 +595,50 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
         }
     };
 
+    const renderContent = () => {
+        switch (request.protocol) {
+            case Protocol.REST:
+                return (
+                    <>
+                        <div className="flex-shrink-0 flex border-b border-border-default">
+                            {(['params', 'headers', 'body', 'auth'] as const).map(tabName => (
+                                <button key={tabName} onClick={() => setActiveConfigTab(tabName)} className={`px-4 py-2 text-sm capitalize ${activeConfigTab === tabName ? 'text-brand border-b-2 border-brand -mb-px' : 'text-text-muted'}`}>
+                                    {tabName}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex-grow flex flex-col min-h-0">
+                            <div className="flex-shrink-0">
+                                {renderConfigPanel()}
+                            </div>
+                            <div className="flex flex-col flex-grow border-t border-border-default min-h-0">
+                                {isLoading ? (
+                                    <div className="flex flex-grow items-center justify-center h-full text-text-muted">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand"></div>
+                                        <span className="ml-4">Loading...</span>
+                                    </div>
+                                ) : response ? (
+                                    <ResponsePanel response={response} />
+                                ) : (
+                                    <div className="flex flex-col flex-grow items-center justify-center h-full text-center text-text-muted p-4">
+                                        <SparklesIcon className="w-12 h-12 mb-4" />
+                                        <h2 className="text-lg font-semibold">Ready to make a request?</h2>
+                                        <p>Click the 'Send' button to see the response here.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                );
+            case Protocol.GraphQL:
+                return <GraphQLPanel tab={tab} />;
+            case Protocol.WebSocket:
+                return <WebSocketPanel tab={tab} />;
+            default:
+                return null;
+        }
+    };
+
     const isHttpProtocol = request.protocol === Protocol.REST || request.protocol === Protocol.GraphQL;
 
     return (
@@ -573,7 +654,7 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
                         {Object.values(Protocol).map(p => <option key={p} value={p} className="bg-bg-subtle font-bold">{p}</option>)}
                     </select>
                     
-                    {isHttpProtocol && (
+                    {request.protocol === Protocol.REST && (
                         <select
                             value={request.method}
                             onChange={(e) => handleRequestChange({ method: e.target.value as HttpMethod })}
@@ -620,41 +701,9 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
                     </div>
                 )}
             </div>
-
-            {isHttpProtocol ? (
-                <>
-                    <div className="flex-shrink-0 flex border-b border-border-default">
-                        {(['params', 'headers', 'body', 'auth'] as const).map(tabName => (
-                            <button key={tabName} onClick={() => setActiveConfigTab(tabName)} className={`px-4 py-2 text-sm capitalize ${activeConfigTab === tabName ? 'text-brand border-b-2 border-brand -mb-px' : 'text-text-muted'}`}>
-                                {tabName}
-                            </button>
-                        ))}
-                    </div>
-                    <div className="flex-grow flex flex-col min-h-0">
-                        <div className="flex-shrink-0">
-                            {renderConfigPanel()}
-                        </div>
-                        <div className="flex flex-col flex-grow border-t border-border-default min-h-0">
-                            {isLoading ? (
-                                <div className="flex flex-grow items-center justify-center h-full text-text-muted">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand"></div>
-                                    <span className="ml-4">Loading...</span>
-                                </div>
-                            ) : response ? (
-                                <ResponsePanel response={response} />
-                            ) : (
-                                <div className="flex flex-col flex-grow items-center justify-center h-full text-center text-text-muted p-4">
-                                    <SparklesIcon className="w-12 h-12 mb-4" />
-                                    <h2 className="text-lg font-semibold">Ready to make a request?</h2>
-                                    <p>Click the 'Send' button to see the response here.</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </>
-            ) : (
-                <WebSocketPanel tab={tab} />
-            )}
+            <div className="flex-grow min-h-0">
+                {renderContent()}
+            </div>
         </div>
     );
 };

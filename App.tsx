@@ -66,13 +66,14 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
         if (newTab.request.protocol === Protocol.WebSocket) {
           newTab.wsStatus = 'disconnected';
           newTab.wsMessages = [];
-          newTab.request.url = 'wss://socketsbay.com/wss/v2/1/demo/';
+          newTab.request.url = 'wss://echo.websocket.org';
         }
         
         if (newTab.request.protocol === Protocol.GraphQL) {
+          newTab.request.url = 'https://graphqlzero.almansi.me/api';
           newTab.gqlVariables = '{\n  "id": 1\n}';
           newTab.request.method = HttpMethod.POST;
-          newTab.request.body = { type: 'raw', content: 'query GetTodo($id: ID!) {\n  todo(id: $id) {\n    id\n    title\n    completed\n  }\n}' };
+          newTab.request.body = { type: 'raw', content: 'query GetPost($id: ID!) {\n  post(id: $id) {\n    id\n    title\n    body\n  }\n}' };
         }
         
         return {
@@ -174,14 +175,15 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
 
                       if (request.protocol && request.protocol !== originalProtocol) {
                           if (request.protocol === Protocol.GraphQL) {
+                              updatedRequest.url = 'https://graphqlzero.almansi.me/api';
                               updatedRequest.method = HttpMethod.POST;
-                              updatedRequest.body = { type: 'raw', content: 'query GetTodo($id: ID!) {\n  todo(id: $id) {\n    id\n    title\n    completed\n  }\n}' };
+                              updatedRequest.body = { type: 'raw', content: 'query GetPost($id: ID!) {\n  post(id: $id) {\n    id\n    title\n    body\n  }\n}' };
                               tab.gqlVariables = '{\n  "id": 1\n}';
                               tab.gqlSchema = undefined;
                               tab.gqlSchemaError = undefined;
                               tab.gqlSchemaLoading = false;
                           } else if (request.protocol === Protocol.WebSocket) {
-                              updatedRequest.url = 'wss://socketsbay.com/wss/v2/1/demo/';
+                              updatedRequest.url = 'wss://echo.websocket.org';
                               tab.wsStatus = 'disconnected';
                               tab.wsMessages = [];
                           } else if (request.protocol === Protocol.REST) {
@@ -271,21 +273,29 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
       }
 
       case 'SET_GQL_SCHEMA_STATE': {
-          const { tabId, schema, isLoading, error } = action.payload;
-          return {
-              ...state,
-              tabs: state.tabs.map(tab => {
-                  if (tab.id === tabId) {
-                      return {
-                          ...tab,
-                          gqlSchema: schema !== undefined ? schema : tab.gqlSchema,
-                          gqlSchemaLoading: isLoading !== undefined ? isLoading : tab.gqlSchemaLoading,
-                          gqlSchemaError: error !== undefined ? error : tab.gqlSchemaError,
-                      };
-                  }
-                  return tab;
-              }),
-          };
+        const { tabId, schema, isLoading, error } = action.payload;
+        return {
+          ...state,
+          tabs: state.tabs.map(tab => {
+            if (tab.id === tabId) {
+              const updatedTab = { ...tab };
+              if (schema !== undefined) {
+                updatedTab.gqlSchema = schema;
+              }
+              if (isLoading !== undefined) {
+                updatedTab.gqlSchemaLoading = isLoading;
+              }
+              // If 'error' is a key in the payload, update the state's error property.
+              // This handles both setting a new error string and clearing an old one
+              // by setting it to `undefined`.
+              if ('error' in action.payload) {
+                updatedTab.gqlSchemaError = error;
+              }
+              return updatedTab;
+            }
+            return tab;
+          }),
+        };
       }
 
       case 'UPDATE_GQL_VARIABLES': {

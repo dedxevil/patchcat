@@ -58,6 +58,19 @@ export const getMethodSelectClasses = (method: HttpMethod): string => {
     }
 }
 
+export const getProtocolDisplayDetails = (protocol: Protocol, method: string): { text: string, className: string } => {
+    switch (protocol) {
+        case Protocol.REST:
+            return { text: method, className: getMethodColorClass(method as HttpMethod) };
+        case Protocol.GraphQL:
+            return { text: 'GQL', className: 'text-purple-400' };
+        case Protocol.WebSocket:
+            return { text: 'WS', className: 'text-blue-400' };
+        default:
+            return { text: 'N/A', className: 'text-text-subtle' };
+    }
+};
+
 export const getInitialWorkspace = (): Workspace => {
     const firstTabId = uuidv4();
     const firstRequestId = uuidv4();

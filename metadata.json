@@ -1,5 +1,5 @@
 {
   "name": "Patchcat API Client",
-  "description": "A browser-based, Postman-like platform to test REST, GraphQL, and WebSocket APIs. Features a multi-tab interface, data persistence, and an AI assistant to analyze and suggest test scenarios.",
+  "description": "A fast, open-source Postman alternative for API testing. A browser-based client for REST, GraphQL, and WebSockets with a powerful AI assistant.",
   "requestFramePermissions": []
 }

@@ -79,6 +79,7 @@ export interface ApiRequest {
   auth: Auth;
   isAiGenerated?: boolean;
   status?: number;
+  operationName?: string;
 }
 
 export interface ApiResponse {

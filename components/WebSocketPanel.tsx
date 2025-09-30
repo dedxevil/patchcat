@@ -60,7 +60,6 @@ const WebSocketPanel: React.FC<WebSocketPanelProps> = ({ tab }) => {
         };
 
         ws.current.onclose = (event) => {
-            ws.current = null;
             dispatch({ type: 'SET_WS_STATUS', payload: { tabId: tab.id, status: 'disconnected' } });
             addSystemMessage(`Connection closed. Code: ${event.code}. Reason: ${event.reason || 'No reason specified'}`);
         };
@@ -108,7 +107,7 @@ const WebSocketPanel: React.FC<WebSocketPanelProps> = ({ tab }) => {
             </div>
 
             {/* Message Log */}
-            <div className="flex-grow p-4 overflow-y-auto space-y-3">
+            <div className="flex-grow min-h-0 p-4 overflow-y-auto space-y-3">
                 {wsMessages?.map(msg => (
                     <div key={msg.id} className={`flex flex-col ${
                         msg.direction === 'sent' ? 'items-end' : 
@@ -119,7 +118,7 @@ const WebSocketPanel: React.FC<WebSocketPanelProps> = ({ tab }) => {
                             msg.direction === 'received' ? 'bg-bg-muted' :
                             'bg-transparent text-text-subtle text-xs'
                         }`}>
-                            <p className="whitespace-pre-wrap break-all">{msg.content}</p>
+                            <p className="whitespace-pre-wrap break-all text-sm">{msg.content}</p>
                         </div>
                         <span className="text-xs text-text-subtle mt-1">
                             {new Date(msg.timestamp).toLocaleTimeString()}

@@ -1,3 +1,4 @@
+
 // FIX: Create RightSidebar component to display AI messages and suggestions.
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { WorkspaceContext } from '../App';
@@ -105,7 +106,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, setIsOpen }) => {
           <h2 className="font-semibold text-lg">AI Assistant</h2>
         </div>
         <div className={`${isOpen ? 'hidden' : 'block'}`}>
-            <Tooltip text="AI Assistant">
+            <Tooltip text="AI Assistant" position="left">
                 <SparklesIcon className="text-brand w-8 h-8" />
             </Tooltip>
         </div>

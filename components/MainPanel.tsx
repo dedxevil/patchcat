@@ -4,7 +4,7 @@ import React, { useContext, useState, useRef, useEffect } from 'react';
 import { WorkspaceContext } from '../App';
 import RequestTab from './RequestTab';
 import { CloseIcon, PlusIcon, SparklesIcon, CopyIcon } from './icons';
-import { getMethodColorClass } from '../constants';
+import { getProtocolDisplayDetails } from '../constants';
 import { Protocol } from '../types';
 
 const MainPanel: React.FC = () => {
@@ -46,26 +46,13 @@ const MainPanel: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
-  const getProtocolDisplay = (tab: (typeof tabs)[0]) => {
-      switch (tab.request.protocol) {
-          case Protocol.REST:
-              return { text: tab.request.method, className: getMethodColorClass(tab.request.method as any) };
-          case Protocol.GraphQL:
-              return { text: 'GQL', className: 'text-purple-400' };
-          case Protocol.WebSocket:
-              return { text: 'WS', className: 'text-blue-400' };
-          default:
-              return { text: 'N/A', className: 'text-text-subtle' };
-      }
-  }
-
   return (
     <div className="flex-grow flex flex-col bg-bg-default min-w-0 min-h-0">
       {/* Tab Bar */}
       <div className="flex-shrink-0 flex items-center border-b border-border-default bg-bg-subtle">
         <div className="flex-grow flex items-center overflow-x-auto">
           {tabs.map(tab => {
-            const protocolDisplay = getProtocolDisplay(tab);
+            const protocolDisplay = getProtocolDisplayDetails(tab.request.protocol, tab.request.method);
             return (
                 <button
                 key={tab.id}
