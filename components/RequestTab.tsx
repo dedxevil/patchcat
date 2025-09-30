@@ -528,44 +528,6 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
                     dispatch({ type: 'ADD_HISTORY', payload: requestWithStatus });
                 }
             }
-        } else if (request.protocol === Protocol.MCP) {
-            // Simulate MCP request
-            const startTime = Date.now();
-            setTimeout(() => {
-                const command = request.method.toUpperCase();
-                const payload = request.body.type === 'raw' ? request.body.content : '';
-                let apiResponse: ApiResponse;
-
-                switch (command) {
-                    case 'GET_STATUS':
-                        apiResponse = {
-                            status: 200, statusText: 'OK', time: Date.now() - startTime, size: 45,
-                            data: 'STATUS: ONLINE\nTEMP: 42.5C\nUPTIME: 3600s', headers: {}
-                        };
-                        break;
-                    case 'REBOOT':
-                        apiResponse = {
-                            status: 202, statusText: 'Accepted', time: Date.now() - startTime, size: 50,
-                            data: `Reboot command accepted. Payload received: ${payload || 'None'}`, headers: {}
-                        };
-                        break;
-                    case 'PING':
-                        apiResponse = {
-                            status: 200, statusText: 'OK', time: Date.now() - startTime, size: 4, data: 'PONG', headers: {}
-                        };
-                        break;
-                    default:
-                        apiResponse = {
-                            status: 400, statusText: 'Bad Command', time: Date.now() - startTime, size: 28,
-                            data: `Error: Unknown command '${request.method}'`, headers: {}
-                        };
-                }
-
-                dispatch({ type: 'SET_RESPONSE', payload: { tabId: tab.id, response: apiResponse } });
-                const requestWithStatus = { ...request, status: apiResponse.status };
-                dispatch({ type: 'ADD_HISTORY', payload: requestWithStatus });
-
-            }, 500 + Math.random() * 500); // Simulate network latency
         }
     };
 
@@ -597,7 +559,6 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
     };
 
     const isHttpProtocol = request.protocol === Protocol.REST || request.protocol === Protocol.GraphQL;
-    const isMcpProtocol = request.protocol === Protocol.MCP;
 
     return (
         <div className="flex flex-col h-full bg-bg-default text-text-default">
@@ -629,26 +590,16 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
                             ))}
                         </select>
                     )}
-
-                    {isMcpProtocol && (
-                        <input
-                            type="text"
-                            placeholder="Command"
-                            value={request.method}
-                            onChange={(e) => handleRequestChange({ method: e.target.value })}
-                            className="font-mono font-bold text-sm bg-transparent border rounded-md focus:outline-none focus:ring-1 focus:ring-brand px-3 py-2 text-orange-400 border-orange-400/50"
-                        />
-                    )}
                 </div>
                 
                 <input
                     type="text"
                     value={request.url}
                     onChange={(e) => handleRequestChange({ url: e.target.value })}
-                    placeholder={isHttpProtocol ? "https://api.example.com/resource" : isMcpProtocol ? "mcp://device.local:4000" : "wss://socket.example.com"}
+                    placeholder={isHttpProtocol ? "https://api.example.com/resource" : "wss://socket.example.com"}
                     className="flex-grow-[999] min-w-[200px] w-full md:w-auto p-2 bg-bg-subtle border border-border-default rounded-md text-sm focus:ring-1 focus:ring-brand focus:outline-none"
                 />
-                {(isHttpProtocol || isMcpProtocol) && (
+                {isHttpProtocol && (
                     <div className="flex items-stretch gap-2 flex-grow-[1] w-full sm:w-auto">
                         <button
                             onClick={handleSendRequest}
@@ -656,7 +607,7 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
                             className="flex-grow flex items-center justify-center gap-2 px-4 py-2 bg-brand text-white rounded-md font-semibold text-sm hover:bg-brand-hover disabled:bg-brand/50 disabled:cursor-not-allowed"
                         >
                             <SendIcon className="w-4 h-4" />
-                            {isLoading ? 'Sending...' : (isMcpProtocol ? 'Send Command' : 'Send')}
+                            {isLoading ? 'Sending...' : 'Send'}
                         </button>
                         {isLoading && (
                             <button
@@ -701,34 +652,6 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
                         </div>
                     </div>
                 </>
-            ) : isMcpProtocol ? (
-                 <div className="flex-grow flex flex-col min-h-0">
-                    <div className="flex-shrink-0 p-4 border-b border-border-default">
-                        <label className="block text-sm font-medium text-text-muted mb-2">Payload</label>
-                        <textarea
-                            value={request.body.type === 'raw' ? request.body.content : ''}
-                            onChange={(e) => handleRequestChange({ body: { type: 'raw', content: e.target.value } })}
-                            placeholder='Enter payload string...'
-                            className="w-full h-24 font-mono text-sm bg-bg-subtle border border-border-default rounded-md p-2 focus:ring-1 focus:ring-brand focus:outline-none"
-                        />
-                    </div>
-                    <div className="flex flex-col flex-grow min-h-0">
-                        {isLoading ? (
-                            <div className="flex flex-grow items-center justify-center h-full text-text-muted">
-                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand"></div>
-                                <span className="ml-4">Sending Command...</span>
-                            </div>
-                        ) : response ? (
-                            <ResponsePanel response={response} />
-                        ) : (
-                            <div className="flex flex-col flex-grow items-center justify-center h-full text-center text-text-muted p-4">
-                                <SparklesIcon className="w-12 h-12 mb-4" />
-                                <h2 className="text-lg font-semibold">Ready to send a command?</h2>
-                                <p>Click the 'Send Command' button to see the response here.</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
             ) : (
                 <WebSocketPanel tab={tab} />
             )}

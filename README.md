@@ -10,7 +10,7 @@
   <img alt="License" src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" />
 </p>
 
-> A blazingly fast, browser-based API client for REST, GraphQL, WebSockets, and custom protocols, supercharged with an AI assistant. An open-source, privacy-first alternative to Postman and Hoppscotch.
+> A blazingly fast, browser-based API client for REST, GraphQL, and WebSockets, supercharged with an AI assistant. An open-source, privacy-first alternative to Postman and Hoppscotch.
 
 ![Patchcat Screenshot](https://i.ibb.co/C3FCyGmS/patchcat-screenshot.png)
 
@@ -30,7 +30,7 @@ Patchcat is designed for developers who need a powerful API sandbox without the 
 
 ## ✨ Key Features
 
--   **Multi-Protocol Support**: First-class support for **REST**, **GraphQL**, **WebSockets**, and custom **MCP (Meta-Control Protocol)** in a unified interface.
+-   **Multi-Protocol Support**: First-class support for **REST**, **GraphQL**, and **WebSockets** in a unified interface.
 -   **AI-Powered Assistant**: Integrated with Google's Gemini API to automatically analyze responses and suggest relevant test cases for edge cases, validation, and error handling.
 -   **Advanced GraphQL Client**:
     -   Automatic schema introspection.
@@ -38,9 +38,6 @@ Patchcat is designed for developers who need a powerful API sandbox without the 
 -   **Real-time WebSocket Client**:
     -   Connect to `ws://` and `wss://` endpoints.
     -   View a real-time log of sent and received messages.
--   **Custom Protocol Testing (MCP)**:
-    -   Test simple text-based command-response protocols, perfect for IoT, game servers, or custom daemons.
-    -   Define custom commands and payloads.
 -   **Comprehensive REST Client**:
     -   Full support for all standard HTTP methods (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, etc.).
     -   Easy editors for query parameters, headers, and various body types (`raw`, `form-data`, `binary/file-upload`).

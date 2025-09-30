@@ -54,8 +54,6 @@ const MainPanel: React.FC = () => {
               return { text: 'GQL', className: 'text-purple-400' };
           case Protocol.WebSocket:
               return { text: 'WS', className: 'text-blue-400' };
-          case Protocol.MCP:
-              return { text: 'MCP', className: 'text-orange-400' };
           default:
               return { text: 'N/A', className: 'text-text-subtle' };
       }
@@ -127,7 +125,6 @@ const MainPanel: React.FC = () => {
                     <button onClick={() => handleAddTab(Protocol.REST)} className="block w-full text-left px-4 py-2 text-sm text-text-default hover:bg-bg-muted">REST Request</button>
                     <button onClick={() => handleAddTab(Protocol.GraphQL)} className="block w-full text-left px-4 py-2 text-sm text-text-default hover:bg-bg-muted">GraphQL Request</button>
                     <button onClick={() => handleAddTab(Protocol.WebSocket)} className="block w-full text-left px-4 py-2 text-sm text-text-default hover:bg-bg-muted">WebSocket</button>
-                    <button onClick={() => handleAddTab(Protocol.MCP)} className="block w-full text-left px-4 py-2 text-sm text-text-default hover:bg-bg-muted">MCP Command</button>
                 </div>
             )}
         </div>

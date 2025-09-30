@@ -75,12 +75,6 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
           newTab.request.body = { type: 'raw', content: 'query GetTodo($id: ID!) {\n  todo(id: $id) {\n    id\n    title\n    completed\n  }\n}' };
         }
         
-        if (newTab.request.protocol === Protocol.MCP) {
-          newTab.request.url = 'mcp://device.local:4000';
-          newTab.request.method = 'GET_STATUS';
-          newTab.request.body = { type: 'raw', content: '' };
-        }
-
         return {
           ...state,
           tabs: [...state.tabs, newTab],
@@ -192,10 +186,6 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
                               tab.wsMessages = [];
                           } else if (request.protocol === Protocol.REST) {
                               updatedRequest.url = 'https://jsonplaceholder.typicode.com/todos/1';
-                          } else if (request.protocol === Protocol.MCP) {
-                              updatedRequest.url = 'mcp://device.local:4000';
-                              updatedRequest.method = 'GET_STATUS';
-                              updatedRequest.body = { type: 'raw', content: '' };
                           }
                       }
                       return { ...tab, request: updatedRequest };

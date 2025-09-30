@@ -14,7 +14,6 @@ export enum Protocol {
   REST = 'REST',
   GraphQL = 'GraphQL',
   WebSocket = 'WebSocket',
-  MCP = 'MCP',
 }
 
 export enum Theme {
