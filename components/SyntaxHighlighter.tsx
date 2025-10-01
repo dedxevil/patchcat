@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface SyntaxHighlighterProps {
@@ -67,7 +66,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({ children, languag
   
   return (
     <pre className={`language-${language} bg-bg-subtle p-4 rounded-md overflow-x-auto text-sm`}>
-      <code className="whitespace-pre">
+      <code>
         {highlightMatches(textContent, searchTerm || '')}
       </code>
     </pre>

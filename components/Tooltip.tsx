@@ -1,14 +1,18 @@
 
-
 import React from 'react';
 
 interface TooltipProps {
   text: string;
   children: React.ReactNode;
   position?: 'top' | 'right' | 'bottom' | 'left';
+  disabled?: boolean;
 }
 
-const Tooltip: React.FC<TooltipProps> = ({ text, children, position = 'top' }) => {
+const Tooltip: React.FC<TooltipProps> = ({ text, children, position = 'top', disabled = false }) => {
+  if (disabled) {
+    return <>{children}</>;
+  }
+
   const getPositionClasses = () => {
     switch (position) {
       case 'right': return 'left-full ml-2 top-1/2 -translate-y-1/2';

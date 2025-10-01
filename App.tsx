@@ -23,6 +23,7 @@ type Action =
   | { type: 'ADD_TO_ANALYSIS_CACHE'; payload: string }
   | { type: 'SET_WS_STATUS'; payload: { tabId: string; status: WsStatus } }
   | { type: 'ADD_WS_MESSAGE'; payload: { tabId: string; message: WebSocketMessage } }
+  | { type: 'CLEAR_WS_MESSAGES'; payload: string }
   | { type: 'SET_GQL_SCHEMA_STATE'; payload: { tabId: string; schema?: GraphQLSchema; isLoading?: boolean; error?: string } }
   | { type: 'UPDATE_GQL_VARIABLES'; payload: { tabId: string; variables: string } };
 
@@ -50,7 +51,7 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
             // Start with sensible defaults
             id: uuidv4(),
             protocol: protocolForNewTab,
-            url: 'https://jsonplaceholder.typicode.com/todos/1',
+            url: '[host]/todos/1',
             method: HttpMethod.GET,
             headers: [],
             queryParams: [],
@@ -70,7 +71,7 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
         }
         
         if (newTab.request.protocol === Protocol.GraphQL) {
-          newTab.request.url = 'https://graphqlzero.almansi.me/api';
+          newTab.request.url = '[gql_host]';
           newTab.gqlVariables = '{\n  "id": 1\n}';
           newTab.request.method = HttpMethod.POST;
           newTab.request.body = { type: 'raw', content: 'query GetPost($id: ID!) {\n  post(id: $id) {\n    id\n    title\n    body\n  }\n}' };
@@ -107,7 +108,7 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
                     id: uuidv4(),
                     name: 'My First Request',
                     protocol: Protocol.REST,
-                    url: 'https://jsonplaceholder.typicode.com/todos/1',
+                    url: '[host]/todos/1',
                     method: HttpMethod.GET,
                     headers: [],
                     queryParams: [],
@@ -175,7 +176,7 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
 
                       if (request.protocol && request.protocol !== originalProtocol) {
                           if (request.protocol === Protocol.GraphQL) {
-                              updatedRequest.url = 'https://graphqlzero.almansi.me/api';
+                              updatedRequest.url = '[gql_host]';
                               updatedRequest.method = HttpMethod.POST;
                               updatedRequest.body = { type: 'raw', content: 'query GetPost($id: ID!) {\n  post(id: $id) {\n    id\n    title\n    body\n  }\n}' };
                               tab.gqlVariables = '{\n  "id": 1\n}';
@@ -187,7 +188,7 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
                               tab.wsStatus = 'disconnected';
                               tab.wsMessages = [];
                           } else if (request.protocol === Protocol.REST) {
-                              updatedRequest.url = 'https://jsonplaceholder.typicode.com/todos/1';
+                              updatedRequest.url = '[host]/todos/1';
                           }
                       }
                       return { ...tab, request: updatedRequest };
@@ -272,6 +273,16 @@ const workspaceReducer = (state: Workspace, action: Action): Workspace => {
           };
       }
 
+      case 'CLEAR_WS_MESSAGES': {
+        const tabId = action.payload;
+        return {
+          ...state,
+          tabs: state.tabs.map(tab =>
+            tab.id === tabId ? { ...tab, wsMessages: [] } : tab
+          ),
+        };
+      }
+
       case 'SET_GQL_SCHEMA_STATE': {
         const { tabId, schema, isLoading, error } = action.payload;
         return {
@@ -339,18 +350,30 @@ export const WorkspaceContext = createContext<{
 
 
 const initializer = (initialArg: () => Workspace): Workspace => {
+  const defaultWorkspace = initialArg();
   try {
     const item = window.localStorage.getItem('patchcat-workspace');
     if (item) {
-        const parsed = JSON.parse(item);
-        if (parsed.tabs && parsed.settings) {
-            return parsed;
+        const loadedWorkspace = JSON.parse(item);
+        // Basic validation
+        if (loadedWorkspace.tabs && loadedWorkspace.settings) {
+            // Perform a deep merge of the settings object to ensure that
+            // new settings fields are added to older workspaces from localStorage.
+            const mergedWorkspace = {
+                ...defaultWorkspace,
+                ...loadedWorkspace,
+                settings: {
+                    ...defaultWorkspace.settings,
+                    ...loadedWorkspace.settings,
+                },
+            };
+            return mergedWorkspace;
         }
     }
   } catch (error) {
-    console.error("Failed to load workspace, starting fresh.", error);
+    console.error("Failed to load workspace from localStorage, starting with a fresh one.", error);
   }
-  return initialArg();
+  return defaultWorkspace;
 };
 
 const App: React.FC = () => {

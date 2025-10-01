@@ -1,4 +1,3 @@
-
 // FIX: Create RightSidebar component to display AI messages and suggestions.
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { WorkspaceContext } from '../App';
@@ -11,9 +10,11 @@ import { getAiChatResponse } from '../services/geminiService';
 interface RightSidebarProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  isEnabled: boolean;
+  onOpenSettings: () => void;
 }
 
-const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, setIsOpen }) => {
+const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, setIsOpen, isEnabled, onOpenSettings }) => {
   const { state, dispatch } = useContext(WorkspaceContext)!;
   const [userInput, setUserInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -21,18 +22,56 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, setIsOpen }) => {
   const isThinking = state.aiMessages.some(m => m.type === 'thinking');
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [state.aiMessages]);
+    if (isEnabled) {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [state.aiMessages, isEnabled]);
 
   // Auto-resize textarea
   useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-        textarea.style.height = 'auto'; // Reset height
-        const scrollHeight = textarea.scrollHeight;
-        textarea.style.height = `${Math.min(scrollHeight, 128)}px`; // Set height with a max
+    if (isEnabled) {
+        const textarea = textareaRef.current;
+        if (textarea) {
+            textarea.style.height = 'auto'; // Reset height
+            const scrollHeight = textarea.scrollHeight;
+            textarea.style.height = `${Math.min(scrollHeight, 128)}px`; // Set height with a max
+        }
     }
-  }, [userInput]);
+  }, [userInput, isEnabled]);
+
+  if (!isEnabled) {
+    return (
+      <div className={`h-full flex flex-col bg-bg-subtle text-sm transition-all duration-300 ease-in-out ${isOpen ? '' : 'p-0 items-center justify-center'}`}>
+        {/* Header */}
+        <div className={`flex items-center gap-2 h-[61px] flex-shrink-0 p-3 border-b border-border-default md:border-b-0 ${isOpen ? 'justify-between' : 'justify-center'}`}>
+          <div className={`flex items-center gap-2 ${!isOpen && 'hidden'}`}>
+            <SparklesIcon className="text-text-subtle" />
+            <h2 className="font-semibold text-lg text-text-subtle">AI Assistant</h2>
+          </div>
+          <div className={`${isOpen ? 'hidden' : 'block'}`}>
+            <Tooltip text="AI Assistant" position="left">
+              <SparklesIcon className="text-text-subtle w-8 h-8" />
+            </Tooltip>
+          </div>
+        </div>
+        
+        {isOpen && (
+          <div className="flex-grow flex flex-col items-center justify-center text-center p-4">
+            <h3 className="font-semibold mb-2 text-text-default">AI Assistant is Disabled</h3>
+            <p className="text-text-muted mb-4">
+              Enable the AI assistant in the settings to get automated test suggestions and chat support.
+            </p>
+            <button
+              onClick={onOpenSettings}
+              className="px-4 py-2 bg-brand text-white rounded-md font-semibold text-sm hover:bg-brand-hover"
+            >
+              Go to Settings
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   const handleSuggestionClick = (suggestion: AiSuggestion) => {
     const { body, ...restOfApiRequest } = suggestion.apiRequest;
@@ -96,7 +135,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, setIsOpen }) => {
 
 
   const activeTab = state.tabs.find(t => t.id === state.activeTabId);
-  const isAiKeyMissing = state.settings.aiEnabled && !state.settings.geminiApiKey;
+  const isAiKeyMissing = !state.settings.geminiApiKey;
 
   return (
     <div className={`h-full flex flex-col bg-bg-subtle text-sm transition-all duration-300 ease-in-out ${isOpen ? '' : 'p-0 items-center justify-center'}`}>

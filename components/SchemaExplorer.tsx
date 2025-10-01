@@ -5,6 +5,7 @@ import { ChevronRightIcon } from './icons';
 interface SchemaExplorerProps {
     schema?: GraphQLSchema;
     onSelectField: (operation: string) => void;
+    searchTerm?: string;
 }
 
 const getTypeName = (type: GraphQLTypeRef): string => {
@@ -27,7 +28,7 @@ const generateSampleOperation = (field: GraphQLField, type: 'query' | 'mutation'
     return `${type} ${operationName}${argsDef ? `(${argsDef})` : ''} {\n  ${field.name}${argsUsage ? `(${argsUsage})` : ''} {\n    # Add fields here\n  }\n}`;
 };
 
-const SchemaExplorer: React.FC<SchemaExplorerProps> = ({ schema, onSelectField }) => {
+const SchemaExplorer: React.FC<SchemaExplorerProps> = ({ schema, onSelectField, searchTerm }) => {
     const [openSections, setOpenSections] = useState({ queries: true, mutations: true });
 
     if (!schema) {
@@ -41,6 +42,18 @@ const SchemaExplorer: React.FC<SchemaExplorerProps> = ({ schema, onSelectField }
     const rootQueryType = schema.types.find(t => t.name === schema.queryType.name);
     const rootMutationType = schema.mutationType ? schema.types.find(t => t.name === schema.mutationType.name) : undefined;
     
+    const filterFields = (fields: GraphQLField[] | undefined): GraphQLField[] | undefined => {
+        if (!searchTerm) return fields;
+        const lowercasedTerm = searchTerm.toLowerCase();
+        return fields?.filter(field => 
+            field.name.toLowerCase().includes(lowercasedTerm) || 
+            getFieldSignature(field).toLowerCase().includes(lowercasedTerm)
+        );
+    };
+
+    const filteredQueries = filterFields(rootQueryType?.fields);
+    const filteredMutations = filterFields(rootMutationType?.fields);
+
     return (
         <div className="p-2 font-mono text-xs">
             {rootQueryType && (
@@ -51,13 +64,16 @@ const SchemaExplorer: React.FC<SchemaExplorerProps> = ({ schema, onSelectField }
                     </button>
                     {openSections.queries && (
                         <ul className="pl-4 border-l border-border-default ml-2">
-                            {rootQueryType.fields?.map(field => (
+                            {filteredQueries?.map(field => (
                                 <li key={field.name} className="py-1 text-text-muted hover:text-text-default">
                                     <button onClick={() => onSelectField(generateSampleOperation(field, 'query'))} className="text-left">
                                         {getFieldSignature(field)}
                                     </button>
                                 </li>
                             ))}
+                             {searchTerm && filteredQueries?.length === 0 && (
+                                <li className="py-1 text-text-subtle italic">No matching queries found.</li>
+                            )}
                         </ul>
                     )}
                 </div>
@@ -70,13 +86,16 @@ const SchemaExplorer: React.FC<SchemaExplorerProps> = ({ schema, onSelectField }
                     </button>
                     {openSections.mutations && (
                         <ul className="pl-4 border-l border-border-default ml-2">
-                            {rootMutationType.fields?.map(field => (
+                            {filteredMutations?.map(field => (
                                 <li key={field.name} className="py-1 text-text-muted hover:text-text-default">
                                     <button onClick={() => onSelectField(generateSampleOperation(field, 'mutation'))} className="text-left">
                                          {getFieldSignature(field)}
                                     </button>
                                 </li>
                             ))}
+                             {searchTerm && filteredMutations?.length === 0 && (
+                                <li className="py-1 text-text-subtle italic">No matching mutations found.</li>
+                            )}
                         </ul>
                     )}
                 </div>

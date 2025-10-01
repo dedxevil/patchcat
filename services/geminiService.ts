@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { ApiRequest, ApiResponse, AiSuggestion } from '../types';
+import { ApiRequest, ApiResponse, AiSuggestion, Protocol } from '../types';
 
 const responseSchema = {
     type: Type.ARRAY,
@@ -55,10 +55,12 @@ const serializeRequestBody = (body: ApiRequest['body']): string => {
 const LARGE_RESPONSE_THRESHOLD_BYTES = 100 * 1024; // 100KB
 
 export const analyzeApiCall = async (
-    request: ApiRequest, 
-    response: ApiResponse, 
+    request: ApiRequest,
+    response: ApiResponse,
     history: ApiRequest[],
-    apiKey: string
+    apiKey: string,
+    gqlVariables?: string,
+    usedVariables?: Record<string, string>
 ): Promise<AiSuggestion[] | null | 'SKIPPED_LARGE'> => {
     if (!apiKey || apiKey.trim() === '') {
         console.error("Gemini API key is missing. Cannot perform analysis.");
@@ -72,16 +74,27 @@ export const analyzeApiCall = async (
 
     const ai = new GoogleGenAI({ apiKey });
 
+    const originalRequest = history.find(h => h.id === request.id) || request;
+    const urlWithPlaceholders = originalRequest.url;
+
     try {
         const historySummary = history.slice(0, 5).map(h => `- ${h.method} ${h.name}`).join('\n');
+
+        let requestDetails = `
+            - Protocol: ${request.protocol}
+            - Method: ${request.method}
+            - URL (Resolved): ${request.url} 
+            - Body: ${serializeRequestBody(request.body)}
+        `;
+        
+        if (request.protocol === Protocol.GraphQL && gqlVariables) {
+            requestDetails += `\n            - Variables: ${gqlVariables}`;
+        }
 
         const prompt = `
             Analyze the following API interaction.
             Request:
-            - Protocol: ${request.protocol}
-            - Method: ${request.method}
-            - URL: ${request.url}
-            - Body: ${serializeRequestBody(request.body)}
+            ${requestDetails}
 
             Response:
             - Status: ${response.status}
@@ -89,6 +102,10 @@ export const analyzeApiCall = async (
 
             Based on this, provide up to 3 distinct and actionable suggestions for the next test cases.
             Each suggestion's apiRequest object MUST use the same protocol as the original request (${request.protocol}).
+            
+            IMPORTANT: When generating the 'url' for a new 'apiRequest', you MUST use the original variable placeholders, NOT the resolved values. The original URL with placeholders was: "${urlWithPlaceholders}". For example, if the resolved URL was "https://api.example.com/users/123" and the original was "[host]/users/123", a new suggestion for an invalid user should use the URL "[host]/users/invalid-id".
+            
+            For GraphQL suggestions, the 'body' field in the apiRequest should be the GraphQL query/mutation string. For REST, it should be a JSON string if applicable.
             Consider edge cases, error handling, different data inputs, or security checks.
             Avoid suggesting tests that are too similar to these recent ones:
             ${historySummary}
@@ -125,7 +142,7 @@ export const getAiChatResponse = async (
 
     const ai = new GoogleGenAI({ apiKey });
 
-    const systemInstruction = "You are Patchcat AI, an expert assistant for API testing. You help users debug APIs, write new tests, suggest improvements, and explain concepts related to REST, GraphQL, and WebSockets. Keep your answers concise and use markdown for formatting.";
+    const systemInstruction = "You are Patchcat AI, a clever cat who is an expert assistant for API testing. Your personality is playful and helpful. You help users debug APIs, write tests, and explain concepts related to REST, GraphQL, and WebSockets. Your responses must be concise and to the point. Use cat-puns sparingly. Use markdown for formatting.";
 
     try {
         const response = await ai.models.generateContent({

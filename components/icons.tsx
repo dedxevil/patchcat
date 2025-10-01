@@ -10,7 +10,6 @@ export const MenuIcon: React.FC<IconProps> = (props) => (
     </svg>
 );
 
-// FIX: Converted kebab-case SVG attributes to camelCase for JSX compatibility and spread props.
 export const SparklesIcon: React.FC<IconProps> = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M12 3L9.27 9.27L3 12l6.27 2.73L12 21l2.73-6.27L21 12l-6.27-2.73L12 3z" />
@@ -137,19 +136,26 @@ export const TerminalIcon: React.FC<IconProps> = (props) => (
     </svg>
 );
 
-// FIX: Converted kebab-case SVG attributes to camelCase for JSX compatibility (e.g., xmlns:xlink to xmlnsXlink) and spread props to the SVG element.
 const NewPatchcatLogoSvg: React.FC<IconProps> = (props) => (
-   <svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" width="20" zoomAndPan="magnify" viewBox="0 0 37.5 37.499999" height="20" preserveAspectRatio="xMidYMid meet" version="1.0" {...props}><defs><clipPath id="d563d2f6e7"><path d="M 2.175781 2.296875 L 34.742188 2.296875 L 34.742188 34.863281 L 2.175781 34.863281 Z M 2.175781 2.296875 " clipRule="nonzero"/></clipPath><clipPath id="ea0e18acd5"><path d="M 3.699219 15.535156 L 34.785156 15.535156 L 34.785156 28 L 3.699219 28 Z M 3.699219 15.535156 " clipRule="nonzero"/></clipPath></defs><g clipPath="url(#d563d2f6e7)"><path fill="#ffffff" d="M 33.308594 15.484375 L 32.613281 9.957031 L 31.78125 3.347656 C 31.699219 2.675781 30.882812 2.386719 30.394531 2.855469 L 25.585938 7.464844 L 24.429688 8.574219 C 22.589844 7.980469 20.589844 7.652344 18.5 7.652344 C 16.429688 7.652344 14.453125 7.96875 12.632812 8.550781 L 11.410156 7.378906 L 6.601562 2.769531 C 6.113281 2.300781 5.296875 2.589844 5.214844 3.261719 L 4.382812 9.871094 L 3.671875 15.507812 C 2.710938 17.234375 2.175781 19.152344 2.175781 21.175781 C 2.175781 28.644531 9.484375 34.699219 18.5 34.699219 C 27.511719 34.699219 34.820312 28.644531 34.820312 21.175781 C 34.820312 19.140625 34.28125 17.214844 33.308594 15.484375 Z M 33.308594 15.484375 " fillOpacity="1" fillRule="nonzero"/></g><g clipPath="url(#ea0e18acd5)"><path fill="#0d0d0e" d="M 34.742188 19.371094 C 34.722656 19.539062 34.582031 19.664062 34.414062 19.664062 C 34.402344 19.664062 34.390625 19.664062 34.378906 19.660156 C 32.507812 19.453125 31.210938 19.367188 29.03125 19.121094 C 28.980469 20.039062 28.457031 27.921875 21.601562 27.179688 C 15.1875 26.484375 16.136719 18.792969 16.355469 17.621094 C 9.605469 16.84375 4.164062 16.214844 4.0625 16.203125 C 3.882812 16.183594 3.753906 16.019531 3.773438 15.839844 C 3.792969 15.660156 3.957031 15.535156 4.136719 15.550781 C 4.328125 15.574219 23.265625 17.765625 34.453125 19.007812 C 34.632812 19.027344 34.761719 19.191406 34.742188 19.371094 Z M 34.742188 19.371094 C 34.722656 19.539062 34.582031 19.664062 34.414062 19.664062 C 34.402344 19.664062 34.390625 19.664062 34.378906 19.660156 C 32.507812 19.453125 31.210938 19.367188 29.03125 19.121094 C 28.980469 20.039062 28.457031 27.921875 21.601562 27.179688 C 15.1875 26.484375 16.136719 18.792969 16.355469 17.621094 C 9.605469 16.84375 4.164062 16.214844 4.0625 16.203125 C 3.882812 16.183594 3.753906 16.019531 3.773438 15.839844 C 3.792969 15.660156 3.957031 15.535156 4.136719 15.550781 C 4.328125 15.574219 23.265625 17.765625 34.453125 19.007812 C 34.632812 19.027344 34.761719 19.191406 34.742188 19.371094 Z M 34.742188 19.371094 " fillOpacity="1" fillRule="nonzero"/></g></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="50" viewBox="0 0 37.5 37.5" preserveAspectRatio="xMidYMid meet" {...props}>
+        <path
+            fill="currentColor"
+            d="M33.31 15.48L32.61 9.96l-.83-6.61a.9.9 0 00-1.09-.82L25.59 7.46l-1.15 1.11c-1.84-.59-3.84-.92-5.94-.92s-4.1.33-5.92.9L11.41 7.38 6.6 2.77a.9.9 0 00-1.09.82l-.83 6.61-.71 5.54C2.71 17.23 2.18 19.15 2.18 21.18c0 7.47 7.31 13.52 16.32 13.52S34.82 28.64 34.82 21.18c0-2.04-.54-3.96-1.51-5.7z"
+        />
+        <path
+            className="logo-accent-shape"
+            d="M34.74 19.37c-.02.17-.16.3-.33.3a.35.35 0 01-.01 0c-1.87-.2-3.17-.29-5.35-.53.05.92.58 8.8-6.28 9.55-6.41-.7-5.46-8.48-5.24-9.66-6.75-.77-12.2-1.4-12.3-1.41a.38.38 0 01-.12-.37c.02-.18.18-.3.36-.29.19.03 19.13 2.22 30.32 3.46.18 0 .3.17.28.35z"
+        />
+    </svg>
 );
 
 export const PatchcatLogo: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) => (
     <div className="flex items-center gap-2" {...props}>
-        <NewPatchcatLogoSvg className="w-8 h-8 text-white" />
+        <NewPatchcatLogoSvg className="w-8 h-8 text-text-default" />
         <h1 className="text-xl font-bold tracking-wider text-text-default hidden sm:block">Patchcat</h1>
     </div>
 );
 
-// FIX: Changed props from React.HTMLAttributes<HTMLDivElement> to IconProps to match the underlying SVG component.
 export const PatchcatLogoIconOnly: React.FC<IconProps> = (props) => (
-    <NewPatchcatLogoSvg className="w-10 h-10 text-white" {...props} />
+    <NewPatchcatLogoSvg className="w-10 h-10 text-text-default" {...props} />
 );

@@ -101,28 +101,24 @@ const Layout: React.FC = () => {
         <MainPanel />
         
         {/* Right Sidebar Toggle Button - Desktop */}
-        {state.settings.aiEnabled && (
-             <button
-                onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
-                className="absolute top-1/2 -right-[13px] transform -translate-y-1/2 z-50 p-1 rounded-full bg-bg-muted hover:bg-border-default border-2 border-border-default hidden md:block"
-                aria-label={rightSidebarOpen ? 'Collapse AI assistant' : 'Expand AI assistant'}
-             >
-                {rightSidebarOpen ? <ChevronRightIcon className="w-4 h-4" /> : <ChevronLeftIcon className="w-4 h-4" />}
-            </button>
-        )}
+        <button
+            onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+            className="absolute top-1/2 -right-[13px] transform -translate-y-1/2 z-50 p-1 rounded-full bg-bg-muted hover:bg-border-default border-2 border-border-default hidden md:block"
+            aria-label={rightSidebarOpen ? 'Collapse AI assistant' : 'Expand AI assistant'}
+        >
+            {rightSidebarOpen ? <ChevronRightIcon className="w-4 h-4" /> : <ChevronLeftIcon className="w-4 h-4" />}
+        </button>
       </div>
 
       {/* Right Sidebar Wrapper */}
-        {state.settings.aiEnabled && (
-            <div
-                className={`flex-shrink-0 transition-all duration-300 ease-in-out bg-bg-subtle
-                    fixed md:relative inset-y-0 right-0 z-40 transform
-                    ${rightSidebarOpen ? 'translate-x-0 w-80' : 'translate-x-full w-80 md:w-20 md:translate-x-0'}`
-                }
-            >
-                <RightSidebar isOpen={rightSidebarOpen} setIsOpen={setRightSidebarOpen} />
-            </div>
-        )}
+        <div
+            className={`flex-shrink-0 transition-all duration-300 ease-in-out bg-bg-subtle
+                fixed md:relative inset-y-0 right-0 z-40 transform
+                ${rightSidebarOpen ? 'translate-x-0 w-80' : 'translate-x-full w-80 md:w-20 md:translate-x-0'}`
+            }
+        >
+            <RightSidebar isOpen={rightSidebarOpen} setIsOpen={setRightSidebarOpen} isEnabled={state.settings.aiEnabled} onOpenSettings={() => setIsSettingsOpen(true)} />
+        </div>
       
       {isSettingsOpen && <SettingsModal onClose={() => setIsSettingsOpen(false)} />}
     </div>
