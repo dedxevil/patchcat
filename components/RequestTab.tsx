@@ -102,7 +102,7 @@ const RequestTab: React.FC<{ tab: TabData }> = ({ tab }) => {
         }
     };
 
-    const activeEnvironment = state.settings.environments.find(e => e.id === state.settings.activeEnvironmentId);
+    const activeEnvironment = (state.settings.environments || []).find(e => e.id === state.settings.activeEnvironmentId);
     const { resolvedText: resolvedUrl, usedVariables } = resolveVariables(request.url, activeEnvironment);
     const hasVariables = Object.keys(usedVariables).length > 0;
 

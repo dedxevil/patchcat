@@ -54,14 +54,22 @@ const MainPanel: React.FC = () => {
           {tabs.map(tab => {
             const protocolDisplay = getProtocolDisplayDetails(tab.request.protocol, tab.request.method);
             return (
-                <button
-                key={tab.id}
-                onClick={() => handleSelectTab(tab.id)}
-                className={`relative flex items-center gap-2 pl-4 pr-14 py-2 text-sm border-r border-border-default group whitespace-nowrap ${
-                    activeTabId === tab.id
-                    ? 'bg-bg-default text-text-default'
-                    : 'text-text-muted hover:bg-bg-muted'
-                }`}
+                <div
+                    key={tab.id}
+                    onClick={() => handleSelectTab(tab.id)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleSelectTab(tab.id);
+                        }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    className={`relative flex items-center gap-2 pl-4 pr-14 py-2 text-sm border-r border-border-default group whitespace-nowrap cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand focus:z-10 ${
+                        activeTabId === tab.id
+                        ? 'bg-bg-default text-text-default'
+                        : 'text-text-muted hover:bg-bg-muted'
+                    }`}
                 >
                 <span className={`font-bold text-xs w-12 text-left ${protocolDisplay.className}`}>
                     {protocolDisplay.text}
@@ -95,7 +103,7 @@ const MainPanel: React.FC = () => {
                         <CloseIcon className="w-3.5 h-3.5" />
                     </button>
                 </div>
-                </button>
+                </div>
             )
           })}
         </div>

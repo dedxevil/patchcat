@@ -367,6 +367,13 @@ const initializer = (initialArg: () => Workspace): Workspace => {
                     ...loadedWorkspace.settings,
                 },
             };
+
+            // Data migration: Ensure environments is always an array to prevent crashes from old data structures.
+            if (!mergedWorkspace.settings.environments || !Array.isArray(mergedWorkspace.settings.environments)) {
+                mergedWorkspace.settings.environments = defaultWorkspace.settings.environments;
+                mergedWorkspace.settings.activeEnvironmentId = defaultWorkspace.settings.activeEnvironmentId;
+            }
+
             return mergedWorkspace;
         }
     }

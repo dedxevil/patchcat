@@ -73,31 +73,34 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
   
   // Environment state
   const [selectedEnvId, setSelectedEnvId] = useState<string | null>(state.settings.activeEnvironmentId);
+  
+  // Defensively handle potentially null/undefined environments from legacy localStorage data
+  const environments = state.settings.environments || [];
 
   const handleSettingsChange = (key: keyof typeof state.settings, value: any) => {
     dispatch({ type: 'UPDATE_SETTINGS', payload: { [key]: value } });
   };
   
-  const selectedEnv = state.settings.environments.find(e => e.id === selectedEnvId);
+  const selectedEnv = environments.find(e => e.id === selectedEnvId);
   
   // --- Environment Handlers ---
   const addEnvironment = () => {
       const newEnv: Environment = {
           id: uuidv4(),
-          name: `New Environment ${state.settings.environments.length + 1}`,
+          name: `New Environment ${environments.length + 1}`,
           variables: [],
       };
-      handleSettingsChange('environments', [...state.settings.environments, newEnv]);
+      handleSettingsChange('environments', [...environments, newEnv]);
       setSelectedEnvId(newEnv.id);
   }
   
   const deleteEnvironment = (envId: string) => {
-      if (state.settings.environments.length <= 1) {
+      if (environments.length <= 1) {
           alert("Cannot delete the last environment.");
           return;
       }
       if (window.confirm("Are you sure you want to delete this environment?")) {
-          const newEnvs = state.settings.environments.filter(e => e.id !== envId);
+          const newEnvs = environments.filter(e => e.id !== envId);
           handleSettingsChange('environments', newEnvs);
           if (selectedEnvId === envId) {
               setSelectedEnvId(newEnvs[0]?.id || null);
@@ -109,7 +112,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
   }
   
   const updateEnvironmentName = (envId: string, name: string) => {
-      const newEnvs = state.settings.environments.map(e => e.id === envId ? { ...e, name } : e);
+      const newEnvs = environments.map(e => e.id === envId ? { ...e, name } : e);
       handleSettingsChange('environments', newEnvs);
   }
 
@@ -117,7 +120,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
       if (!selectedEnv) return;
       const newVars = [...selectedEnv.variables];
       (newVars[index] as any)[field] = value;
-      const newEnvs = state.settings.environments.map(e => e.id === selectedEnv.id ? { ...e, variables: newVars } : e);
+      const newEnvs = environments.map(e => e.id === selectedEnv.id ? { ...e, variables: newVars } : e);
       handleSettingsChange('environments', newEnvs);
   }
 
@@ -125,14 +128,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
       if (!selectedEnv) return;
       const newVar: EnvironmentVariable = { id: uuidv4(), key: '', value: '', enabled: true };
       const newVars = [...selectedEnv.variables, newVar];
-      const newEnvs = state.settings.environments.map(e => e.id === selectedEnv.id ? { ...e, variables: newVars } : e);
+      const newEnvs = environments.map(e => e.id === selectedEnv.id ? { ...e, variables: newVars } : e);
       handleSettingsChange('environments', newEnvs);
   }
 
   const removeEnvVar = (index: number) => {
       if (!selectedEnv) return;
       const newVars = selectedEnv.variables.filter((_, i) => i !== index);
-      const newEnvs = state.settings.environments.map(e => e.id === selectedEnv.id ? { ...e, variables: newVars } : e);
+      const newEnvs = environments.map(e => e.id === selectedEnv.id ? { ...e, variables: newVars } : e);
       handleSettingsChange('environments', newEnvs);
   }
   
@@ -241,7 +244,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                   onChange={(e) => handleSettingsChange('activeEnvironmentId', e.target.value)}
                   className="w-full p-2 rounded-md bg-bg-subtle border border-border-default focus:outline-none focus:ring-2 focus:ring-brand"
               >
-                  {state.settings.environments.map(env => (
+                  {environments.map(env => (
                       <option key={env.id} value={env.id}>{env.name}</option>
                   ))}
               </select>
@@ -255,7 +258,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
             </div>
             <div className="flex gap-4">
                 <ul className="w-1/3 border border-border-default rounded-md p-1 space-y-1">
-                    {state.settings.environments.map(env => (
+                    {environments.map(env => (
                         <li key={env.id}>
                             <button
                                 onClick={() => setSelectedEnvId(env.id)}

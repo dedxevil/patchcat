@@ -1,5 +1,4 @@
 
-
 export enum HttpMethod {
   GET = 'GET',
   POST = 'POST',
@@ -179,6 +178,19 @@ export interface AiMessage {
   suggestions?: AiSuggestion[];
 }
 
+export interface EnvironmentVariable {
+  id: string;
+  key: string;
+  value: string;
+  enabled: boolean;
+}
+
+export interface Environment {
+  id: string;
+  name: string;
+  variables: EnvironmentVariable[];
+}
+
 export interface Settings {
   theme: Theme;
   font: AppFont;
@@ -187,6 +199,8 @@ export interface Settings {
   globalHeaders: Header[];
   globalQueryParams: QueryParam[];
   globalAuth: Auth;
+  environments: Environment[];
+  activeEnvironmentId: string | null;
 }
 
 export interface Workspace {
